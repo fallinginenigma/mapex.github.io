@@ -1,16 +1,17 @@
-# Mapex
+# MAPEx
 
-GitHub Pages site hosted at [mapex.github.io](https://mapex.github.io).
+An interactive visual explainer for **Mean Absolute Percentage Error (MAPE)** across forecast horizons — inspired by [MLU-Explain](https://mlu-explain.github.io/).
 
-## Local Development
+Live at [mapex.github.io](https://mapex.github.io).
 
-This site uses [Jekyll](https://jekyllrb.com/), the static site generator built into GitHub Pages.
+## What's Inside
 
-To run locally:
+- **Interactive MAPE calculator** — drag sliders to change forecasts and watch MAPE update live
+- **Time series visualization** — see how forecasts diverge from actuals as the horizon increases
+- **MAPEx bar chart** — explore how MAPE grows with forecast horizon, with adjustable noise and trend controls
+- **Benchmark reference** — quick visual guide to interpreting MAPE values
+- **Educational content** — formula breakdown, limitations, and alternatives
 
-```bash
-bundle install
-bundle exec jekyll serve
-```
+## Tech
 
-Then visit `http://localhost:4000`.
+Built with vanilla HTML/CSS/JS and [D3.js](https://d3js.org/) v7. No build step required — just static files served by GitHub Pages.
