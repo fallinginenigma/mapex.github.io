@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAPEx — Understanding Mean Absolute Percentage Error Over Forecast Horizons</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafaf9;
+      --text: #1c1917;
+      --text-muted: #57534e;
+      --accent: #6d28d9;
+      --accent-light: #ede9fe;
+      --accent-mid: #a78bfa;
+      --orange: #ea580c;
+      --orange-light: #fff7ed;
+      --teal: #0d9488;
+      --teal-light: #f0fdfa;
+      --red: #dc2626;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --border: #e7e5e4;
+      --card-bg: #ffffff;
+      --code-bg: #f5f5f4;
+      --serif: 'Source Serif 4', Georgia, serif;
+      --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      --mono: 'Fira Code', 'SF Mono', monospace;
+      --max-w: 740px;
+      --wide-max-w: 960px;
+    }
+
+    html { scroll-behavior: smooth; font-size: 18px; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.3em 1em;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      max-width: 800px;
+      margin: 0 auto 1rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Article body ── */
+    .article { max-width: var(--max-w); margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .article h2 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 3.5rem 0 1rem;
+      color: var(--text);
+    }
+
+    .article h3 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 2.5rem 0 0.75rem;
+    }
+
+    .article p { margin-bottom: 1.25rem; color: var(--text); }
+    .article p.muted { color: var(--text-muted); font-size: 0.95rem; }
+
+    .article a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .article a:hover { color: var(--orange); }
+
+    .highlight { color: var(--accent); font-weight: 600; }
+    .highlight-orange { color: var(--orange); font-weight: 600; }
+    .highlight-teal { color: var(--teal); font-weight: 600; }
+
+    /* ── Formula card ── */
+    .formula-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0 2rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .formula-card .formula {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      line-height: 2;
+      color: var(--text);
+    }
+
+    .formula .f-var { color: var(--accent); font-weight: 500; }
+    .formula .f-actual { color: var(--teal); font-weight: 500; }
+    .formula .f-pred { color: var(--orange); font-weight: 500; }
+    .formula .f-op { color: var(--text-muted); }
+
+    .formula-card .formula-label {
+      display: block;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Visualization containers ── */
+    .vis-wide {
+      max-width: var(--wide-max-w);
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .vis-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.5rem 1rem;
+      margin: 2rem 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    .vis-card h4 {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .vis-card svg { display: block; width: 100%; height: auto; }
+
+    /* ── Interactive controls ── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: var(--code-bg);
+      border-radius: 8px;
+    }
+
+    .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .control-group label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .control-group .value-display {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--accent);
+      min-width: 3ch;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 180px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-light);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .callout.callout-orange {
+      border-left-color: var(--orange);
+      background: var(--orange-light);
+    }
+
+    .callout.callout-teal {
+      border-left-color: var(--teal);
+      background: var(--teal-light);
+    }
+
+    .callout strong { font-weight: 700; }
+
+    /* ── Step-through / scrollytelling ── */
+    .step-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .step-card:hover {
+      border-color: var(--accent-mid);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.08);
+    }
+
+    .step-card .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem; height: 2rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-card h5 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .step-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── Table for MAPE calculation ── */
+    .calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+
+    .calc-table th {
+      background: var(--code-bg);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0.6rem 0.75rem;
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .calc-table td {
+      padding: 0.55rem 0.75rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+
+    .calc-table tr:last-child td { border-bottom: none; }
+    .calc-table .col-actual { color: var(--teal); font-weight: 500; }
+    .calc-table .col-pred { color: var(--orange); font-weight: 500; }
+    .calc-table .col-error { color: var(--red); font-weight: 500; }
+
+    .mape-result {
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 0.75rem;
+      background: var(--accent-light);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    /* ── Horizon bar chart colors ── */
+    .horizon-bar { transition: all 0.3s ease; }
+    .horizon-bar:hover { opacity: 0.85; }
+
+    /* ── Tooltip ── */
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: var(--text);
+      color: #fff;
+      padding: 0.4rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+    }
+
+    .legend-swatch {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Animated dot ── */
+    @keyframes pulse {
+      0%, 100% { r: 4; opacity: 1; }
+      50% { r: 7; opacity: 0.6; }
+    }
+
+    .pulse-dot { animation: pulse 2s ease-in-out infinite; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 3rem 0;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      html { font-size: 16px; }
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+      .article { padding: 2rem 1.25rem 3rem; }
+      input[type="range"] { width: 140px; }
+      .controls { gap: 0.75rem; padding: 0.75rem; }
+      .step-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <div class="hero-badge">Interactive Explainer</div>
+  <h1>MAPE<span>x</span></h1>
+  <p>A visual, interactive guide to <strong>Mean Absolute Percentage Error</strong> and how forecast accuracy changes across prediction horizons.</p>
+</header>
+
+<!-- ══════════════ ARTICLE ══════════════ -->
+<main class="article">
+
+  <!-- ── Section 1: What is Forecasting? ── -->
+  <h2>Why Forecast Accuracy Matters</h2>
+  <p>
+    Organizations use forecasts to predict future demand, revenue, inventory needs, and more.
+    A forecast is only useful if it's <em>accurate enough</em> to drive good decisions. But how
+    do we measure "accurate enough"?
+  </p>
+  <p>
+    One of the most widely used metrics is <span class="highlight">MAPE</span> — the
+    <strong>Mean Absolute Percentage Error</strong>. It tells you, on average, how far off your
+    predictions are from reality, expressed as a percentage.
+  </p>
+
+  <!-- ── Section 2: The MAPE Formula ── -->
+  <h2>The MAPE Formula</h2>
+  <p>MAPE is calculated in four intuitive steps:</p>
+
+  <div class="step-cards">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h5>Error</h5>
+      <p>Subtract the forecast from the actual value for each period.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h5>Absolute</h5>
+      <p>Take the absolute value — we care about magnitude, not direction.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h5>Percentage</h5>
+      <p>Divide by the actual value to get a relative error for each period.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h5>Mean</h5>
+      <p>Average all the percentage errors across periods.</p>
+    </div>
+  </div>
+
+  <div class="formula-card">
+    <div class="formula">
+      <span class="f-var">MAPE</span>
+      <span class="f-op">=</span>
+      <span class="f-op">(</span><span class="f-var">100%</span>
+      <span class="f-op"> / </span><span class="f-var">n</span><span class="f-op">)</span>
+      <span class="f-op"> × </span>
+      <span class="f-op">Σ</span>
+      <span class="f-op"> |</span><span class="f-actual">Aₜ</span>
+      <span class="f-op"> − </span><span class="f-pred">Fₜ</span><span class="f-op">|</span>
+      <span class="f-op"> / </span>
+      <span class="f-op">|</span><span class="f-actual">Aₜ</span><span class="f-op">|</span>
+    </div>
+    <span class="formula-label">
+      where <span class="f-actual">Aₜ</span> = actual value,
+      <span class="f-pred">Fₜ</span> = forecast value,
+      <span class="f-var">n</span> = number of periods
+    </span>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>Interpretation:</strong> A MAPE of 5% means your forecasts are, on average, 5% away from
+    the actual values. Lower is better.
+  </div>
+
+  <!-- ── Section 3: Interactive MAPE Calculator ── -->
+  <h2>See MAPE in Action</h2>
+  <p>
+    The table below shows a simple example. <strong>Drag the sliders</strong> to change the
+    forecast values and watch MAPE update in real time.
+  </p>
+
+  <div class="vis-card">
+    <h4>Interactive MAPE Calculator</h4>
+    <div id="calc-container">
+      <table class="calc-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Actual (Aₜ)</th>
+            <th>Forecast (Fₜ)</th>
+            <th>|Aₜ − Fₜ| / |Aₜ|</th>
+          </tr>
+        </thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      <div id="mape-result" class="mape-result"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Section 4: What is a Forecast Horizon? ── -->
+  <h2>What is a Forecast Horizon?</h2>
+  <p>
+    The <span class="highlight-orange">forecast horizon</span> is how far into the future your
+    model predicts. A 1-step horizon means predicting the next period; a 12-step horizon means
+    predicting 12 periods ahead.
+  </p>
+  <p>
+    This is the <strong>"x"</strong> in <span class="highlight">MAPEx</span>. When we say
+    "MAPE over horizon x", we mean: <em>what is the MAPE when the model forecasts x steps
+    into the future?</em>
+  </p>
+
+  <div class="callout">
+    <strong>Key insight:</strong> Forecasting next week's sales is much easier than forecasting
+    sales three months from now. As the horizon increases, uncertainty accumulates — and so does error.
+  </div>
+
+  <!-- ── Section 5: Interactive Time Series + Horizon ── -->
+  <h2>Forecasts Across Horizons</h2>
+  <p>
+    The chart below shows actual values (solid line) and forecasts at different horizons.
+    Use the slider to change the forecast horizon and observe how the predictions diverge from
+    reality as we look further ahead.
+  </p>
+
+  <div class="vis-card">
+    <h4>Actual vs. Forecast — Adjustable Horizon</h4>
+    <div class="controls">
+      <div class="control-group">
+        <label>Forecast Horizon (x)</label>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="range" id="horizon-slider" min="1" max="12" value="1" step="1">
+          <span class="value-display" id="horizon-value">1</span>
+          <span style="font-size:0.78rem;color:var(--text-muted);">steps ahead</span>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(234,88,12,0.15)"></div> Error region</div>
+    </div>
+    <div id="ts-chart"></div>
+    <div id="ts-mape" class="mape-result" style="margin-top:0.75rem;"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Section 6: MAPE vs Horizon ── -->
+  <h2>MAPEx: Error Grows with Horizon</h2>
+  <p>
+    Now let's plot the MAPE <em>itself</em> for each horizon. This is the MAPEx curve — it shows
+    how forecast quality degrades as we predict further into the future.
+  </p>
+
+  <div class="vis-card">
+    <h4>MAPEx — MAPE at Each Forecast Horizon</h4>
+    <div class="controls">
+      <div class="control-group">
+        <label>Noise Level</label>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="range" id="noise-slider" min="1" max="10" value="4" step="1">
+          <span class="value-display" id="noise-value">4</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Trend Strength</label>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="range" id="trend-slider" min="0" max="10" value="3" step="1">
+          <span class="value-display" id="trend-value">3</span>
+        </div>
+      </div>
+    </div>
+    <div id="mapex-chart"></div>
+  </div>
+
+  <p>
+    Notice the characteristic upward shape: short horizons produce small errors, while
+    longer horizons produce progressively larger errors. The rate of increase depends on
+    the <span class="highlight-orange">noise</span> in the data and the
+    <span class="highlight-teal">trend strength</span>.
+  </p>
+
+  <hr class="divider">
+
+  <!-- ── Section 7: Why does error grow? ── -->
+  <h2>Why Does Error Grow with Horizon?</h2>
+
+  <div class="step-cards">
+    <div class="step-card">
+      <div class="step-num" style="background:var(--orange)">1</div>
+      <h5>Error Accumulation</h5>
+      <p>Recursive models feed predictions back as inputs. Small errors compound at each step.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:var(--orange)">2</div>
+      <h5>Increasing Uncertainty</h5>
+      <p>The further ahead we look, the more unforeseen events can occur. The future is fundamentally uncertain.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:var(--orange)">3</div>
+      <h5>Signal Decay</h5>
+      <p>Recent observations carry strong signal. As the horizon grows, the model must rely on weaker, older patterns.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Section 8: Interpreting MAPE ── -->
+  <h2>Interpreting MAPE Values</h2>
+
+  <div class="vis-card">
+    <h4>MAPE Quality Benchmarks</h4>
+    <div id="benchmark-chart"></div>
+  </div>
+
+  <p class="muted">
+    These benchmarks are rough rules of thumb. What counts as "good" depends entirely on the
+    domain — a 10% MAPE might be excellent for long-range energy demand forecasts but
+    unacceptable for short-term stock predictions.
+  </p>
+
+  <hr class="divider">
+
+  <!-- ── Section 9: Limitations ── -->
+  <h2>Limitations of MAPE</h2>
+
+  <div class="callout callout-orange">
+    <strong>Division by zero:</strong> If any actual value Aₜ is zero, MAPE is undefined.
+    This makes MAPE unsuitable for intermittent or sparse data.
+  </div>
+
+  <p>
+    <strong>Asymmetric penalty:</strong> MAPE penalizes over-forecasts more heavily than
+    under-forecasts. A forecast of 150 when actual is 100 gives 50% error, but a forecast
+    of 50 when actual is 100 also gives 50%. However, there's no upper bound for over-forecasting
+    errors while under-forecasting errors cap at 100%.
+  </p>
+
+  <p>
+    <strong>Scale sensitivity at low volumes:</strong> If actual demand is 2 units and you forecast 1,
+    the percentage error is 50% — despite only being off by a single unit.
+  </p>
+
+  <h3>Alternatives</h3>
+  <p>
+    Consider <strong>WMAPE</strong> (Weighted MAPE) for handling varying magnitudes,
+    <strong>MASE</strong> (Mean Absolute Scaled Error) for a scale-free metric that avoids the
+    division-by-zero problem, or <strong>RMSE</strong> (Root Mean Squared Error) when large errors
+    matter disproportionately.
+  </p>
+
+  <hr class="divider">
+
+  <!-- ── Section 10: Takeaways ── -->
+  <h2>Key Takeaways</h2>
+  <div class="step-cards">
+    <div class="step-card" style="border-color:var(--accent-mid)">
+      <h5>MAPE is intuitive</h5>
+      <p>A percentage-based error that's easy to communicate and compare across datasets.</p>
+    </div>
+    <div class="step-card" style="border-color:var(--accent-mid)">
+      <h5>Horizon matters</h5>
+      <p>MAPEx reveals how accuracy degrades as you forecast further ahead — essential for setting expectations.</p>
+    </div>
+    <div class="step-card" style="border-color:var(--accent-mid)">
+      <h5>Know the limits</h5>
+      <p>MAPE struggles with zeros, is asymmetric, and is sensitive to small actuals. Pair it with other metrics.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <p>
+    <strong>MAPEx</strong> — An interactive explainer on forecast accuracy.
+    Built with <a href="https://d3js.org/" target="_blank" rel="noopener">D3.js</a>.
+  </p>
+</footer>
+
+<!-- ══════════════ TOOLTIP ══════════════ -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+(function () {
+  "use strict";
+
+  const accent = "#6d28d9";
+  const orange = "#ea580c";
+  const teal = "#0d9488";
+  const red = "#dc2626";
+  const green = "#16a34a";
+  const blue = "#2563eb";
+  const textMuted = "#57534e";
+  const border = "#e7e5e4";
+
+  const tooltip = d3.select("#tooltip");
+
+  function showTooltip(evt, html) {
+    tooltip.html(html).style("opacity", 1);
+    const ttNode = tooltip.node();
+    const ttRect = ttNode.getBoundingClientRect();
+    let left = evt.pageX + 12;
+    let top = evt.pageY - 28;
+    if (left + ttRect.width > window.innerWidth - 16) left = evt.pageX - ttRect.width - 12;
+    tooltip.style("left", left + "px").style("top", top + "px");
+  }
+
+  function hideTooltip() { tooltip.style("opacity", 0); }
+
+  /* ═══════════════════════════════════════
+     1) Interactive MAPE Calculator Table
+     ═══════════════════════════════════════ */
+  const calcActuals = [100, 120, 90, 110, 105];
+  const calcForecasts = [95, 130, 85, 100, 115];
+
+  function renderCalcTable() {
+    const tbody = d3.select("#calc-body");
+    tbody.selectAll("tr").remove();
+
+    let sumPctErr = 0;
+    calcActuals.forEach((a, i) => {
+      const f = calcForecasts[i];
+      const pctErr = Math.abs(a - f) / Math.abs(a);
+      sumPctErr += pctErr;
+
+      const tr = tbody.append("tr");
+      tr.append("td").text("t" + (i + 1));
+      tr.append("td").attr("class", "col-actual").text(a);
+      const tdF = tr.append("td");
+      const inp = tdF.append("input")
+        .attr("type", "range")
+        .attr("min", Math.round(a * 0.5))
+        .attr("max", Math.round(a * 1.5))
+        .attr("value", f)
+        .style("width", "90px");
+      tdF.append("span")
+        .attr("class", "col-pred")
+        .style("margin-left", "0.4rem")
+        .style("font-family", "var(--mono)")
+        .text(f);
+      tr.append("td").attr("class", "col-error").text((pctErr * 100).toFixed(1) + "%");
+
+      inp.on("input", function () {
+        calcForecasts[i] = +this.value;
+        renderCalcTable();
+      });
+    });
+
+    const mape = (sumPctErr / calcActuals.length) * 100;
+    d3.select("#mape-result").text("MAPE = " + mape.toFixed(2) + "%");
+  }
+  renderCalcTable();
+
+  /* ═══════════════════════════════════════
+     2) Time Series Forecast Chart
+     ═══════════════════════════════════════ */
+  // Generate synthetic "actual" time series (seeded)
+  function seededRandom(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 16807 + 0) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+  }
+
+  const rng = seededRandom(42);
+  const N = 30;
+  const actuals = [];
+  let val = 100;
+  for (let i = 0; i < N; i++) {
+    val += (rng() - 0.45) * 8 + 0.3;
+    val = Math.max(val, 20);
+    actuals.push(Math.round(val * 10) / 10);
+  }
+
+  // Generate forecasts with error proportional to horizon
+  function generateForecasts(horizon) {
+    const rng2 = seededRandom(123 + horizon);
+    return actuals.map((a, i) => {
+      const noise = (rng2() - 0.5) * 2 * horizon * 2.2;
+      const drift = horizon * 0.4 * (rng2() - 0.45);
+      return Math.round((a + noise + drift) * 10) / 10;
+    });
+  }
+
+  function computeMAPE(act, pred) {
+    let sum = 0;
+    let n = 0;
+    act.forEach((a, i) => {
+      if (a !== 0) {
+        sum += Math.abs(a - pred[i]) / Math.abs(a);
+        n++;
+      }
+    });
+    return n > 0 ? (sum / n) * 100 : 0;
+  }
+
+  const tsMargin = { top: 20, right: 20, bottom: 35, left: 50 };
+  const tsContainer = d3.select("#ts-chart");
+
+  function renderTSChart() {
+    tsContainer.selectAll("*").remove();
+    const cw = tsContainer.node().getBoundingClientRect().width;
+    const width = cw;
+    const height = Math.min(340, cw * 0.5);
+    const iw = width - tsMargin.left - tsMargin.right;
+    const ih = height - tsMargin.top - tsMargin.bottom;
+
+    const horizon = +d3.select("#horizon-slider").property("value");
+    d3.select("#horizon-value").text(horizon);
+    const forecasts = generateForecasts(horizon);
+    const mape = computeMAPE(actuals, forecasts);
+    d3.select("#ts-mape").text("MAPE at horizon " + horizon + " = " + mape.toFixed(2) + "%");
+
+    const svg = tsContainer.append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const g = svg.append("g").attr("transform", `translate(${tsMargin.left},${tsMargin.top})`);
+
+    const x = d3.scaleLinear().domain([0, N - 1]).range([0, iw]);
+    const allVals = actuals.concat(forecasts);
+    const y = d3.scaleLinear().domain([d3.min(allVals) - 5, d3.max(allVals) + 5]).range([ih, 0]);
+
+    // Axes
+    g.append("g").attr("transform", `translate(0,${ih})`)
+      .call(d3.axisBottom(x).ticks(10).tickFormat(d => "t" + (d + 1)))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(6))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    // Grid
+    g.append("g").attr("class", "grid")
+      .call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(""))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5));
+
+    // Error area
+    const area = d3.area()
+      .x((d, i) => x(i))
+      .y0((d, i) => y(Math.min(actuals[i], forecasts[i])))
+      .y1((d, i) => y(Math.max(actuals[i], forecasts[i])))
+      .curve(d3.curveMonotoneX);
+
+    g.append("path")
+      .datum(actuals)
+      .attr("d", area)
+      .attr("fill", "rgba(234,88,12,0.12)")
+      .attr("stroke", "none");
+
+    // Lines
+    const lineGen = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX);
+
+    g.append("path").datum(actuals)
+      .attr("d", lineGen)
+      .attr("fill", "none")
+      .attr("stroke", teal)
+      .attr("stroke-width", 2.5);
+
+    g.append("path").datum(forecasts)
+      .attr("d", lineGen)
+      .attr("fill", "none")
+      .attr("stroke", orange)
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "6 3");
+
+    // Dots
+    g.selectAll(".dot-actual").data(actuals).enter()
+      .append("circle")
+      .attr("cx", (d, i) => x(i))
+      .attr("cy", d => y(d))
+      .attr("r", 3)
+      .attr("fill", teal)
+      .on("mouseover", function (evt, d) {
+        const i = actuals.indexOf(d);
+        showTooltip(evt, `t${i + 1}<br>Actual: ${d}<br>Forecast: ${forecasts[i]}<br>Error: ${(Math.abs(d - forecasts[i]) / Math.abs(d) * 100).toFixed(1)}%`);
+      })
+      .on("mousemove", function (evt) {
+        showTooltip(evt, tooltip.html());
+      })
+      .on("mouseout", hideTooltip);
+  }
+
+  renderTSChart();
+  d3.select("#horizon-slider").on("input", renderTSChart);
+
+  /* ═══════════════════════════════════════
+     3) MAPEx Chart — MAPE vs Horizon
+     ═══════════════════════════════════════ */
+  const mapexMargin = { top: 20, right: 30, bottom: 40, left: 55 };
+
+  function renderMAPExChart() {
+    const container = d3.select("#mapex-chart");
+    container.selectAll("*").remove();
+
+    const noise = +d3.select("#noise-slider").property("value");
+    const trend = +d3.select("#trend-slider").property("value");
+    d3.select("#noise-value").text(noise);
+    d3.select("#trend-value").text(trend);
+
+    // Generate data with controllable noise and trend
+    const rng3 = seededRandom(77);
+    const N2 = 40;
+    const act2 = [];
+    let v = 100;
+    for (let i = 0; i < N2; i++) {
+      v += (rng3() - 0.5) * noise * 1.5 + trend * 0.3;
+      v = Math.max(v, 20);
+      act2.push(Math.round(v * 10) / 10);
+    }
+
+    const horizons = d3.range(1, 13);
+    const mapexData = horizons.map(h => {
+      const rng4 = seededRandom(200 + h);
+      const pred2 = act2.map(a => {
+        const n = (rng4() - 0.5) * 2 * h * noise * 0.6;
+        const d = h * trend * 0.15 * (rng4() - 0.4);
+        return a + n + d;
+      });
+      return { horizon: h, mape: computeMAPE(act2, pred2) };
+    });
+
+    const cw = container.node().getBoundingClientRect().width;
+    const width = cw;
+    const height = Math.min(360, cw * 0.55);
+    const iw = width - mapexMargin.left - mapexMargin.right;
+    const ih = height - mapexMargin.top - mapexMargin.bottom;
+
+    const svg = container.append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const g = svg.append("g").attr("transform", `translate(${mapexMargin.left},${mapexMargin.top})`);
+
+    const x = d3.scaleBand().domain(horizons).range([0, iw]).padding(0.35);
+    const yMax = d3.max(mapexData, d => d.mape) * 1.15;
+    const y = d3.scaleLinear().domain([0, yMax]).range([ih, 0]);
+
+    // Color scale for bars
+    const colorScale = d3.scaleSequential()
+      .domain([0, yMax])
+      .interpolator(d3.interpolateRgb(accent, orange));
+
+    // Axes
+    g.append("g").attr("transform", `translate(0,${ih})`)
+      .call(d3.axisBottom(x).tickFormat(d => "h=" + d))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    // X-axis label
+    g.append("text")
+      .attr("x", iw / 2)
+      .attr("y", ih + 35)
+      .attr("text-anchor", "middle")
+      .attr("fill", textMuted)
+      .style("font-size", "0.72rem")
+      .text("Forecast Horizon (x)");
+
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d => d.toFixed(0) + "%"))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    // Y-axis label
+    g.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -ih / 2)
+      .attr("y", -42)
+      .attr("text-anchor", "middle")
+      .attr("fill", textMuted)
+      .style("font-size", "0.72rem")
+      .text("MAPE (%)");
+
+    // Grid
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(""))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5));
+
+    // Bars
+    g.selectAll(".horizon-bar")
+      .data(mapexData)
+      .enter()
+      .append("rect")
+      .attr("class", "horizon-bar")
+      .attr("x", d => x(d.horizon))
+      .attr("width", x.bandwidth())
+      .attr("y", ih)
+      .attr("height", 0)
+      .attr("rx", 4)
+      .attr("fill", d => colorScale(d.mape))
+      .on("mouseover", function (evt, d) {
+        d3.select(this).attr("opacity", 0.8);
+        showTooltip(evt, `Horizon: ${d.horizon} steps<br>MAPE: ${d.mape.toFixed(2)}%`);
+      })
+      .on("mousemove", function (evt, d) {
+        showTooltip(evt, `Horizon: ${d.horizon} steps<br>MAPE: ${d.mape.toFixed(2)}%`);
+      })
+      .on("mouseout", function () {
+        d3.select(this).attr("opacity", 1);
+        hideTooltip();
+      })
+      .transition()
+      .duration(600)
+      .delay((d, i) => i * 50)
+      .attr("y", d => y(d.mape))
+      .attr("height", d => ih - y(d.mape));
+
+    // Value labels on bars
+    g.selectAll(".bar-label")
+      .data(mapexData)
+      .enter()
+      .append("text")
+      .attr("x", d => x(d.horizon) + x.bandwidth() / 2)
+      .attr("y", d => y(d.mape) - 6)
+      .attr("text-anchor", "middle")
+      .attr("fill", textMuted)
+      .style("font-size", "0.6rem")
+      .style("font-family", "var(--mono)")
+      .style("opacity", 0)
+      .text(d => d.mape.toFixed(1) + "%")
+      .transition()
+      .duration(600)
+      .delay((d, i) => i * 50 + 300)
+      .style("opacity", 1);
+
+    // Trend line
+    const lineData = mapexData.map(d => [x(d.horizon) + x.bandwidth() / 2, y(d.mape)]);
+    const trendLine = d3.line().curve(d3.curveMonotoneX);
+
+    g.append("path")
+      .datum(lineData)
+      .attr("d", trendLine)
+      .attr("fill", "none")
+      .attr("stroke", accent)
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4 3")
+      .attr("opacity", 0.5);
+  }
+
+  renderMAPExChart();
+  d3.select("#noise-slider").on("input", renderMAPExChart);
+  d3.select("#trend-slider").on("input", renderMAPExChart);
+
+  /* ═══════════════════════════════════════
+     4) Benchmark / Interpretation Chart
+     ═══════════════════════════════════════ */
+  (function () {
+    const benchmarks = [
+      { label: "Excellent", range: "< 10%", lo: 0, hi: 10, color: "#16a34a" },
+      { label: "Good", range: "10–20%", lo: 10, hi: 20, color: "#65a30d" },
+      { label: "Reasonable", range: "20–30%", lo: 20, hi: 30, color: "#eab308" },
+      { label: "Poor", range: "30–50%", lo: 30, hi: 50, color: "#f97316" },
+      { label: "Inaccurate", range: "> 50%", lo: 50, hi: 70, color: "#dc2626" },
+    ];
+
+    const container = d3.select("#benchmark-chart");
+    const cw = container.node().getBoundingClientRect().width;
+    const width = cw;
+    const height = 180;
+    const margin = { top: 15, right: 20, bottom: 30, left: 90 };
+    const iw = width - margin.left - margin.right;
+    const ih = height - margin.top - margin.bottom;
+
+    const svg = container.append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const y = d3.scaleBand().domain(benchmarks.map(d => d.label)).range([0, ih]).padding(0.3);
+    const x = d3.scaleLinear().domain([0, 70]).range([0, iw]);
+
+    g.append("g")
+      .call(d3.axisBottom(x).ticks(7).tickFormat(d => d + "%"))
+      .attr("transform", `translate(0,${ih})`)
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    g.append("g")
+      .call(d3.axisLeft(y))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").remove())
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.72rem").style("font-weight", "600"));
+
+    g.selectAll(".bench-bar")
+      .data(benchmarks)
+      .enter()
+      .append("rect")
+      .attr("x", d => x(d.lo))
+      .attr("y", d => y(d.label))
+      .attr("width", 0)
+      .attr("height", y.bandwidth())
+      .attr("rx", 4)
+      .attr("fill", d => d.color)
+      .attr("opacity", 0.8)
+      .transition()
+      .duration(700)
+      .delay((d, i) => i * 80)
+      .attr("width", d => x(d.hi) - x(d.lo));
+
+    g.selectAll(".bench-label")
+      .data(benchmarks)
+      .enter()
+      .append("text")
+      .attr("x", d => x(d.hi) + 6)
+      .attr("y", d => y(d.label) + y.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .attr("fill", textMuted)
+      .style("font-size", "0.65rem")
+      .style("font-family", "var(--mono)")
+      .text(d => d.range);
+  })();
+
+  /* ═══════════════════════════════════════
+     5) Responsive resize
+     ═══════════════════════════════════════ */
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      renderTSChart();
+      renderMAPExChart();
+    }, 200);
+  });
+
+  /* ═══════════════════════════════════════
+     6) Intersection observer for animations
+     ═══════════════════════════════════════ */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = "1";
+        entry.target.style.transform = "translateY(0)";
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll(".vis-card, .step-card, .callout, .formula-card").forEach(el => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(20px)";
+    el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+    observer.observe(el);
+  });
+
+})();
+</script>
+</body>
+</html>
