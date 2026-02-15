@@ -541,8 +541,8 @@
   <h2>What is a Forecast Horizon?</h2>
   <p>
     The <span class="highlight-orange">forecast horizon</span> is how far into the future your
-    model predicts. A 1-step horizon means predicting the next period; a 12-step horizon means
-    predicting 12 periods ahead.
+    model predicts. A 7-day horizon means predicting one week ahead; a 35-day horizon means
+    predicting five weeks ahead.
   </p>
   <p>
     This is the <strong>"x"</strong> in <span class="highlight">MAPEx</span>. When we say
@@ -569,9 +569,9 @@
       <div class="control-group">
         <label>Forecast Horizon (x)</label>
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="horizon-slider" min="1" max="12" value="1" step="1">
-          <span class="value-display" id="horizon-value">1</span>
-          <span style="font-size:0.78rem;color:var(--text-muted);">steps ahead</span>
+          <input type="range" id="horizon-slider" min="0" max="4" value="0" step="1">
+          <span class="value-display" id="horizon-value">7</span>
+          <span style="font-size:0.78rem;color:var(--text-muted);">days ahead</span>
         </div>
       </div>
     </div>
@@ -593,8 +593,16 @@
     how forecast quality degrades as we predict further into the future.
   </p>
 
+  <div class="callout callout-teal" style="font-size:0.88rem;">
+    <strong>Try it:</strong> Set noise to <strong>1</strong> vs <strong>8</strong> and see how the MAPEx curve changes. Higher noise shifts the entire curve upward.
+  </div>
+
   <div class="vis-card">
     <h4>MAPEx — MAPE at Each Forecast Horizon</h4>
+    <div class="legend" style="margin-bottom:0.5rem;">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--accent)"></div> Current</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d4d4d4"></div> Previous (ghost)</div>
+    </div>
     <div class="controls">
       <div class="control-group">
         <label>Noise Level</label>
@@ -613,6 +621,8 @@
     </div>
     <div id="mapex-chart"></div>
   </div>
+
+  <p class="muted" style="text-align:center;margin-top:0.5rem;">In this demo, we simulate a recursive model: each step uses the previous forecast as input, so errors accumulate.</p>
 
   <p>
     Notice the characteristic upward shape: short horizons produce small errors, while
@@ -682,6 +692,14 @@
     the percentage error is 50% — despite only being off by a single unit.
   </p>
 
+  <div class="callout callout-orange">
+    <strong>Volume weighting across SKUs:</strong> When computing MAPEx across multiple SKUs
+    (products), high-volume items dominate the aggregate MAPE since their absolute errors are
+    larger. A single best-selling SKU can skew the overall MAPEx curve, masking poor performance
+    on low-volume items. Consider computing MAPE per-SKU first, then averaging, or use WMAPE
+    to explicitly weight by volume.
+  </div>
+
   <h3>Alternatives</h3>
   <p>
     Consider <strong>WMAPE</strong> (Weighted MAPE) for handling varying magnitudes,
@@ -692,7 +710,59 @@
 
   <hr class="divider">
 
-  <!-- ── Section 10: Takeaways ── -->
+  <!-- ── Section 10: Upload your own data ── -->
+  <h2>Try Your Own Data</h2>
+  <p>
+    Upload a CSV with columns <code>actual</code> and <code>forecast</code> to compute your
+    own MAPE. Optionally include a <code>horizon</code> column (e.g. 7, 14, 21, 28, 35) to
+    see your own MAPEx curve.
+  </p>
+
+  <div class="vis-card">
+    <h4>CSV Upload</h4>
+    <div class="controls" style="flex-direction:column;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <input type="file" id="csv-upload" accept=".csv" style="font-size:0.85rem;">
+        <button id="csv-sample-btn" style="font-size:0.78rem;padding:0.4em 1em;border-radius:6px;border:1px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-weight:600;">Load sample data</button>
+      </div>
+      <p id="csv-status" class="muted" style="margin:0.5rem 0 0;font-size:0.8rem;"></p>
+    </div>
+    <div id="csv-result" style="display:none;">
+      <div id="csv-mape-result" class="mape-result"></div>
+      <div id="csv-mapex-chart" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Section 11: Horizon Lag Visualization ── -->
+  <h2>Understanding Horizon Lag</h2>
+  <p>
+    When you forecast at horizon <span class="highlight-orange">x</span>, you're predicting
+    the value <em>x days from now</em> using only data available <em>today</em>. The gap between
+    the last known data point and the prediction target is the <strong>lag</strong>.
+  </p>
+  <p>
+    The visualization below shows this for each horizon. The solid region is known data,
+    the gap is the lag (the blind spot), and the point at the end is what the model must predict.
+    As the horizon grows, the lag grows — and the model has less relevant information to work with.
+  </p>
+
+  <div class="vis-card">
+    <h4>Horizon Lag — What the Model "Sees" vs. What It Must Predict</h4>
+    <div id="lag-chart"></div>
+  </div>
+
+  <p>
+    At <span class="highlight">day 7</span>, the model predicts just one week out — the lag is
+    short and recent patterns are still relevant. By <span class="highlight-orange">day 35</span>,
+    the model must bridge a five-week gap, during which demand patterns, seasonality, and external
+    factors can all shift. This is why MAPEx increases with horizon.
+  </p>
+
+  <hr class="divider">
+
+  <!-- ── Section 12: Takeaways ── -->
   <h2>Key Takeaways</h2>
   <div class="step-cards">
     <div class="step-card" style="border-color:var(--accent-mid)">
@@ -735,6 +805,10 @@
   const blue = "#2563eb";
   const textMuted = "#57534e";
   const border = "#e7e5e4";
+  const ghost = "#d4d4d4";
+
+  // Day-based horizons
+  const HORIZONS = [7, 14, 21, 28, 35];
 
   const tooltip = d3.select("#tooltip");
 
@@ -797,7 +871,6 @@
   /* ═══════════════════════════════════════
      2) Time Series Forecast Chart
      ═══════════════════════════════════════ */
-  // Generate synthetic "actual" time series (seeded)
   function seededRandom(seed) {
     let s = seed;
     return function () {
@@ -816,12 +889,13 @@
     actuals.push(Math.round(val * 10) / 10);
   }
 
-  // Generate forecasts with error proportional to horizon
-  function generateForecasts(horizon) {
-    const rng2 = seededRandom(123 + horizon);
+  // Generate forecasts with error proportional to horizon (in days)
+  function generateForecasts(horizonDays) {
+    const rng2 = seededRandom(123 + horizonDays);
+    const factor = horizonDays / 7; // normalise so day 7 ≈ old horizon 1
     return actuals.map((a, i) => {
-      const noise = (rng2() - 0.5) * 2 * horizon * 2.2;
-      const drift = horizon * 0.4 * (rng2() - 0.45);
+      const noise = (rng2() - 0.5) * 2 * factor * 2.2;
+      const drift = factor * 0.4 * (rng2() - 0.45);
       return Math.round((a + noise + drift) * 10) / 10;
     });
   }
@@ -830,7 +904,7 @@
     let sum = 0;
     let n = 0;
     act.forEach((a, i) => {
-      if (a !== 0) {
+      if (a !== 0 && pred[i] !== undefined) {
         sum += Math.abs(a - pred[i]) / Math.abs(a);
         n++;
       }
@@ -849,11 +923,12 @@
     const iw = width - tsMargin.left - tsMargin.right;
     const ih = height - tsMargin.top - tsMargin.bottom;
 
-    const horizon = +d3.select("#horizon-slider").property("value");
-    d3.select("#horizon-value").text(horizon);
-    const forecasts = generateForecasts(horizon);
+    const sliderIdx = +d3.select("#horizon-slider").property("value");
+    const horizonDays = HORIZONS[sliderIdx];
+    d3.select("#horizon-value").text(horizonDays);
+    const forecasts = generateForecasts(horizonDays);
     const mape = computeMAPE(actuals, forecasts);
-    d3.select("#ts-mape").text("MAPE at horizon " + horizon + " = " + mape.toFixed(2) + "%");
+    d3.select("#ts-mape").text("MAPE at horizon " + horizonDays + " days = " + mape.toFixed(2) + "%");
 
     const svg = tsContainer.append("svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
@@ -865,9 +940,8 @@
     const allVals = actuals.concat(forecasts);
     const y = d3.scaleLinear().domain([d3.min(allVals) - 5, d3.max(allVals) + 5]).range([ih, 0]);
 
-    // Axes
     g.append("g").attr("transform", `translate(0,${ih})`)
-      .call(d3.axisBottom(x).ticks(10).tickFormat(d => "t" + (d + 1)))
+      .call(d3.axisBottom(x).ticks(10).tickFormat(d => "d" + ((d + 1) * 1)))
       .call(g => g.select(".domain").attr("stroke", border))
       .call(g => g.selectAll(".tick line").attr("stroke", border))
       .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
@@ -878,7 +952,6 @@
       .call(g => g.selectAll(".tick line").attr("stroke", border))
       .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
 
-    // Grid
     g.append("g").attr("class", "grid")
       .call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(""))
       .call(g => g.select(".domain").remove())
@@ -891,42 +964,25 @@
       .y1((d, i) => y(Math.max(actuals[i], forecasts[i])))
       .curve(d3.curveMonotoneX);
 
-    g.append("path")
-      .datum(actuals)
-      .attr("d", area)
-      .attr("fill", "rgba(234,88,12,0.12)")
-      .attr("stroke", "none");
+    g.append("path").datum(actuals).attr("d", area)
+      .attr("fill", "rgba(234,88,12,0.12)").attr("stroke", "none");
 
-    // Lines
     const lineGen = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX);
 
-    g.append("path").datum(actuals)
-      .attr("d", lineGen)
-      .attr("fill", "none")
-      .attr("stroke", teal)
-      .attr("stroke-width", 2.5);
+    g.append("path").datum(actuals).attr("d", lineGen)
+      .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2.5);
 
-    g.append("path").datum(forecasts)
-      .attr("d", lineGen)
-      .attr("fill", "none")
-      .attr("stroke", orange)
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "6 3");
+    g.append("path").datum(forecasts).attr("d", lineGen)
+      .attr("fill", "none").attr("stroke", orange).attr("stroke-width", 2).attr("stroke-dasharray", "6 3");
 
-    // Dots
     g.selectAll(".dot-actual").data(actuals).enter()
       .append("circle")
-      .attr("cx", (d, i) => x(i))
-      .attr("cy", d => y(d))
-      .attr("r", 3)
-      .attr("fill", teal)
+      .attr("cx", (d, i) => x(i)).attr("cy", d => y(d)).attr("r", 3).attr("fill", teal)
       .on("mouseover", function (evt, d) {
         const i = actuals.indexOf(d);
-        showTooltip(evt, `t${i + 1}<br>Actual: ${d}<br>Forecast: ${forecasts[i]}<br>Error: ${(Math.abs(d - forecasts[i]) / Math.abs(d) * 100).toFixed(1)}%`);
+        showTooltip(evt, `Day ${i + 1}<br>Actual: ${d}<br>Forecast: ${forecasts[i]}<br>Error: ${(Math.abs(d - forecasts[i]) / Math.abs(d) * 100).toFixed(1)}%`);
       })
-      .on("mousemove", function (evt) {
-        showTooltip(evt, tooltip.html());
-      })
+      .on("mousemove", function (evt) { showTooltip(evt, tooltip.html()); })
       .on("mouseout", hideTooltip);
   }
 
@@ -934,20 +990,13 @@
   d3.select("#horizon-slider").on("input", renderTSChart);
 
   /* ═══════════════════════════════════════
-     3) MAPEx Chart — MAPE vs Horizon
+     3) MAPEx Chart — MAPE vs Horizon (days)
+        with ghost bars for previous state
      ═══════════════════════════════════════ */
   const mapexMargin = { top: 20, right: 30, bottom: 40, left: 55 };
+  let previousMapexData = null; // stores ghost data
 
-  function renderMAPExChart() {
-    const container = d3.select("#mapex-chart");
-    container.selectAll("*").remove();
-
-    const noise = +d3.select("#noise-slider").property("value");
-    const trend = +d3.select("#trend-slider").property("value");
-    d3.select("#noise-value").text(noise);
-    d3.select("#trend-value").text(trend);
-
-    // Generate data with controllable noise and trend
+  function computeMapexData(noise, trend) {
     const rng3 = seededRandom(77);
     const N2 = 40;
     const act2 = [];
@@ -958,16 +1007,28 @@
       act2.push(Math.round(v * 10) / 10);
     }
 
-    const horizons = d3.range(1, 13);
-    const mapexData = horizons.map(h => {
+    return HORIZONS.map(h => {
       const rng4 = seededRandom(200 + h);
+      const factor = h / 7;
       const pred2 = act2.map(a => {
-        const n = (rng4() - 0.5) * 2 * h * noise * 0.6;
-        const d = h * trend * 0.15 * (rng4() - 0.4);
+        const n = (rng4() - 0.5) * 2 * factor * noise * 0.6;
+        const d = factor * trend * 0.15 * (rng4() - 0.4);
         return a + n + d;
       });
       return { horizon: h, mape: computeMAPE(act2, pred2) };
     });
+  }
+
+  function renderMAPExChart() {
+    const container = d3.select("#mapex-chart");
+    container.selectAll("*").remove();
+
+    const noise = +d3.select("#noise-slider").property("value");
+    const trend = +d3.select("#trend-slider").property("value");
+    d3.select("#noise-value").text(noise);
+    d3.select("#trend-value").text(trend);
+
+    const mapexData = computeMapexData(noise, trend);
 
     const cw = container.node().getBoundingClientRect().width;
     const width = cw;
@@ -975,36 +1036,34 @@
     const iw = width - mapexMargin.left - mapexMargin.right;
     const ih = height - mapexMargin.top - mapexMargin.bottom;
 
+    // Compute yMax accounting for both current and ghost data
+    let allMapes = mapexData.map(d => d.mape);
+    if (previousMapexData) allMapes = allMapes.concat(previousMapexData.map(d => d.mape));
+    const yMax = d3.max(allMapes) * 1.15;
+
     const svg = container.append("svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet");
 
     const g = svg.append("g").attr("transform", `translate(${mapexMargin.left},${mapexMargin.top})`);
 
-    const x = d3.scaleBand().domain(horizons).range([0, iw]).padding(0.35);
-    const yMax = d3.max(mapexData, d => d.mape) * 1.15;
+    const x = d3.scaleBand().domain(HORIZONS).range([0, iw]).padding(0.25);
     const y = d3.scaleLinear().domain([0, yMax]).range([ih, 0]);
 
-    // Color scale for bars
     const colorScale = d3.scaleSequential()
       .domain([0, yMax])
       .interpolator(d3.interpolateRgb(accent, orange));
 
     // Axes
     g.append("g").attr("transform", `translate(0,${ih})`)
-      .call(d3.axisBottom(x).tickFormat(d => "h=" + d))
+      .call(d3.axisBottom(x).tickFormat(d => d + "d"))
       .call(g => g.select(".domain").attr("stroke", border))
       .call(g => g.selectAll(".tick line").attr("stroke", border))
       .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
 
-    // X-axis label
-    g.append("text")
-      .attr("x", iw / 2)
-      .attr("y", ih + 35)
-      .attr("text-anchor", "middle")
-      .attr("fill", textMuted)
-      .style("font-size", "0.72rem")
-      .text("Forecast Horizon (x)");
+    g.append("text").attr("x", iw / 2).attr("y", ih + 35)
+      .attr("text-anchor", "middle").attr("fill", textMuted)
+      .style("font-size", "0.72rem").text("Forecast Horizon (days)");
 
     g.append("g")
       .call(d3.axisLeft(y).ticks(6).tickFormat(d => d.toFixed(0) + "%"))
@@ -1012,15 +1071,10 @@
       .call(g => g.selectAll(".tick line").attr("stroke", border))
       .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
 
-    // Y-axis label
-    g.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -ih / 2)
-      .attr("y", -42)
-      .attr("text-anchor", "middle")
-      .attr("fill", textMuted)
-      .style("font-size", "0.72rem")
-      .text("MAPE (%)");
+    g.append("text").attr("transform", "rotate(-90)")
+      .attr("x", -ih / 2).attr("y", -42)
+      .attr("text-anchor", "middle").attr("fill", textMuted)
+      .style("font-size", "0.72rem").text("MAPE (%)");
 
     // Grid
     g.append("g")
@@ -1028,7 +1082,30 @@
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5));
 
-    // Bars
+    // Ghost bars (previous state)
+    if (previousMapexData) {
+      g.selectAll(".ghost-bar")
+        .data(previousMapexData)
+        .enter()
+        .append("rect")
+        .attr("class", "ghost-bar")
+        .attr("x", d => x(d.horizon))
+        .attr("width", x.bandwidth())
+        .attr("y", d => y(d.mape))
+        .attr("height", d => ih - y(d.mape))
+        .attr("rx", 4)
+        .attr("fill", ghost)
+        .attr("opacity", 0.5);
+
+      // Ghost trend line
+      const ghostLine = previousMapexData.map(d => [x(d.horizon) + x.bandwidth() / 2, y(d.mape)]);
+      g.append("path").datum(ghostLine)
+        .attr("d", d3.line().curve(d3.curveMonotoneX))
+        .attr("fill", "none").attr("stroke", ghost)
+        .attr("stroke-width", 2).attr("stroke-dasharray", "3 4").attr("opacity", 0.6);
+    }
+
+    // Current bars
     g.selectAll(".horizon-bar")
       .data(mapexData)
       .enter()
@@ -1036,57 +1113,46 @@
       .attr("class", "horizon-bar")
       .attr("x", d => x(d.horizon))
       .attr("width", x.bandwidth())
-      .attr("y", ih)
-      .attr("height", 0)
+      .attr("y", ih).attr("height", 0)
       .attr("rx", 4)
       .attr("fill", d => colorScale(d.mape))
       .on("mouseover", function (evt, d) {
         d3.select(this).attr("opacity", 0.8);
-        showTooltip(evt, `Horizon: ${d.horizon} steps<br>MAPE: ${d.mape.toFixed(2)}%`);
+        let ttHtml = `Horizon: ${d.horizon} days<br>MAPE: ${d.mape.toFixed(2)}%`;
+        if (previousMapexData) {
+          const prev = previousMapexData.find(p => p.horizon === d.horizon);
+          if (prev) ttHtml += `<br><span style="color:${ghost}">Previous: ${prev.mape.toFixed(2)}%</span>`;
+        }
+        showTooltip(evt, ttHtml);
       })
-      .on("mousemove", function (evt, d) {
-        showTooltip(evt, `Horizon: ${d.horizon} steps<br>MAPE: ${d.mape.toFixed(2)}%`);
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("opacity", 1);
-        hideTooltip();
-      })
-      .transition()
-      .duration(600)
-      .delay((d, i) => i * 50)
+      .on("mousemove", function (evt) { showTooltip(evt, tooltip.html()); })
+      .on("mouseout", function () { d3.select(this).attr("opacity", 1); hideTooltip(); })
+      .transition().duration(600).delay((d, i) => i * 50)
       .attr("y", d => y(d.mape))
       .attr("height", d => ih - y(d.mape));
 
-    // Value labels on bars
+    // Value labels
     g.selectAll(".bar-label")
       .data(mapexData)
       .enter()
       .append("text")
       .attr("x", d => x(d.horizon) + x.bandwidth() / 2)
       .attr("y", d => y(d.mape) - 6)
-      .attr("text-anchor", "middle")
-      .attr("fill", textMuted)
-      .style("font-size", "0.6rem")
-      .style("font-family", "var(--mono)")
-      .style("opacity", 0)
-      .text(d => d.mape.toFixed(1) + "%")
-      .transition()
-      .duration(600)
-      .delay((d, i) => i * 50 + 300)
+      .attr("text-anchor", "middle").attr("fill", textMuted)
+      .style("font-size", "0.6rem").style("font-family", "var(--mono)")
+      .style("opacity", 0).text(d => d.mape.toFixed(1) + "%")
+      .transition().duration(600).delay((d, i) => i * 50 + 300)
       .style("opacity", 1);
 
     // Trend line
     const lineData = mapexData.map(d => [x(d.horizon) + x.bandwidth() / 2, y(d.mape)]);
-    const trendLine = d3.line().curve(d3.curveMonotoneX);
+    g.append("path").datum(lineData)
+      .attr("d", d3.line().curve(d3.curveMonotoneX))
+      .attr("fill", "none").attr("stroke", accent)
+      .attr("stroke-width", 2).attr("stroke-dasharray", "4 3").attr("opacity", 0.5);
 
-    g.append("path")
-      .datum(lineData)
-      .attr("d", trendLine)
-      .attr("fill", "none")
-      .attr("stroke", accent)
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "4 3")
-      .attr("opacity", 0.5);
+    // Store current as ghost for next render
+    previousMapexData = mapexData;
   }
 
   renderMAPExChart();
@@ -1135,49 +1201,310 @@
       .call(g => g.selectAll(".tick line").remove())
       .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.72rem").style("font-weight", "600"));
 
-    g.selectAll(".bench-bar")
-      .data(benchmarks)
-      .enter()
+    g.selectAll(".bench-bar").data(benchmarks).enter()
       .append("rect")
-      .attr("x", d => x(d.lo))
-      .attr("y", d => y(d.label))
-      .attr("width", 0)
-      .attr("height", y.bandwidth())
-      .attr("rx", 4)
-      .attr("fill", d => d.color)
-      .attr("opacity", 0.8)
-      .transition()
-      .duration(700)
-      .delay((d, i) => i * 80)
+      .attr("x", d => x(d.lo)).attr("y", d => y(d.label))
+      .attr("width", 0).attr("height", y.bandwidth())
+      .attr("rx", 4).attr("fill", d => d.color).attr("opacity", 0.8)
+      .transition().duration(700).delay((d, i) => i * 80)
       .attr("width", d => x(d.hi) - x(d.lo));
 
-    g.selectAll(".bench-label")
-      .data(benchmarks)
-      .enter()
+    g.selectAll(".bench-label").data(benchmarks).enter()
       .append("text")
       .attr("x", d => x(d.hi) + 6)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
-      .attr("dy", "0.35em")
-      .attr("fill", textMuted)
-      .style("font-size", "0.65rem")
-      .style("font-family", "var(--mono)")
+      .attr("dy", "0.35em").attr("fill", textMuted)
+      .style("font-size", "0.65rem").style("font-family", "var(--mono)")
       .text(d => d.range);
   })();
 
   /* ═══════════════════════════════════════
-     5) Responsive resize
+     5) CSV Upload — custom MAPEx
+     ═══════════════════════════════════════ */
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return null;
+    const headers = lines[0].toLowerCase().split(",").map(h => h.trim());
+    const ai = headers.indexOf("actual");
+    const fi = headers.indexOf("forecast");
+    const hi = headers.indexOf("horizon");
+    if (ai === -1 || fi === -1) return null;
+
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map(c => c.trim());
+      if (!cols[ai] || !cols[fi]) continue;
+      const row = { actual: +cols[ai], forecast: +cols[fi] };
+      if (hi !== -1 && cols[hi]) row.horizon = +cols[hi];
+      if (!isNaN(row.actual) && !isNaN(row.forecast)) rows.push(row);
+    }
+    return rows.length > 0 ? rows : null;
+  }
+
+  function renderCSVResult(rows) {
+    const resultDiv = d3.select("#csv-result");
+    resultDiv.style("display", "block");
+    d3.select("#csv-mapex-chart").selectAll("*").remove();
+
+    const hasHorizon = rows[0].horizon !== undefined;
+
+    if (hasHorizon) {
+      // Group by horizon and compute MAPE for each
+      const grouped = d3.group(rows, d => d.horizon);
+      const mapexData = [];
+      grouped.forEach((vals, h) => {
+        const act = vals.map(v => v.actual);
+        const pred = vals.map(v => v.forecast);
+        mapexData.push({ horizon: h, mape: computeMAPE(act, pred) });
+      });
+      mapexData.sort((a, b) => a.horizon - b.horizon);
+
+      const overallAct = rows.map(r => r.actual);
+      const overallPred = rows.map(r => r.forecast);
+      const overallMape = computeMAPE(overallAct, overallPred);
+      d3.select("#csv-mape-result").text("Overall MAPE = " + overallMape.toFixed(2) + "%");
+
+      // Draw MAPEx bar chart
+      const container = d3.select("#csv-mapex-chart");
+      const cw = container.node().getBoundingClientRect().width;
+      const width = cw;
+      const height = Math.min(300, cw * 0.5);
+      const margin = { top: 20, right: 20, bottom: 40, left: 55 };
+      const iw = width - margin.left - margin.right;
+      const ih = height - margin.top - margin.bottom;
+
+      const svg = container.append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet");
+
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleBand().domain(mapexData.map(d => d.horizon)).range([0, iw]).padding(0.35);
+      const yMax = d3.max(mapexData, d => d.mape) * 1.15;
+      const y = d3.scaleLinear().domain([0, yMax]).range([ih, 0]);
+
+      const colorScale = d3.scaleSequential()
+        .domain([0, yMax]).interpolator(d3.interpolateRgb(accent, orange));
+
+      g.append("g").attr("transform", `translate(0,${ih})`)
+        .call(d3.axisBottom(x).tickFormat(d => d + "d"))
+        .call(g => g.select(".domain").attr("stroke", border))
+        .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+      g.append("g")
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(0) + "%"))
+        .call(g => g.select(".domain").attr("stroke", border))
+        .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+      g.append("g")
+        .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(""))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5));
+
+      g.selectAll(".csv-bar").data(mapexData).enter()
+        .append("rect")
+        .attr("x", d => x(d.horizon)).attr("width", x.bandwidth())
+        .attr("y", ih).attr("height", 0).attr("rx", 4)
+        .attr("fill", d => colorScale(d.mape))
+        .on("mouseover", function(evt, d) {
+          showTooltip(evt, `Horizon: ${d.horizon} days<br>MAPE: ${d.mape.toFixed(2)}%`);
+        })
+        .on("mouseout", hideTooltip)
+        .transition().duration(600).delay((d, i) => i * 60)
+        .attr("y", d => y(d.mape)).attr("height", d => ih - y(d.mape));
+
+      g.selectAll(".csv-label").data(mapexData).enter()
+        .append("text")
+        .attr("x", d => x(d.horizon) + x.bandwidth() / 2)
+        .attr("y", d => y(d.mape) - 6)
+        .attr("text-anchor", "middle").attr("fill", textMuted)
+        .style("font-size", "0.6rem").style("font-family", "var(--mono)")
+        .text(d => d.mape.toFixed(1) + "%");
+
+    } else {
+      // No horizon column — just show overall MAPE
+      const act = rows.map(r => r.actual);
+      const pred = rows.map(r => r.forecast);
+      const mape = computeMAPE(act, pred);
+      d3.select("#csv-mape-result").text("MAPE = " + mape.toFixed(2) + "% (" + rows.length + " rows)");
+      d3.select("#csv-mapex-chart").append("p")
+        .attr("class", "muted")
+        .style("text-align", "center").style("font-size", "0.82rem")
+        .text("Add a \"horizon\" column (e.g. 7, 14, 21, 28, 35) to see a MAPEx curve.");
+    }
+  }
+
+  // File upload handler
+  d3.select("#csv-upload").on("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const rows = parseCSV(e.target.result);
+      if (!rows) {
+        d3.select("#csv-status").text("Could not parse CSV. Ensure it has \"actual\" and \"forecast\" columns.");
+        d3.select("#csv-result").style("display", "none");
+        return;
+      }
+      d3.select("#csv-status").text("Loaded " + rows.length + " rows from " + file.name);
+      renderCSVResult(rows);
+    };
+    reader.readAsText(file);
+  });
+
+  // Sample data button
+  d3.select("#csv-sample-btn").on("click", function () {
+    const sampleCSV = [
+      "actual,forecast,horizon",
+      "100,97,7", "120,115,7", "90,88,7", "110,108,7", "105,101,7",
+      "100,92,14", "120,110,14", "90,82,14", "110,100,14", "105,95,14",
+      "100,88,21", "120,105,21", "90,78,21", "110,95,21", "105,90,21",
+      "100,82,28", "120,98,28", "90,72,28", "110,88,28", "105,84,28",
+      "100,75,35", "120,92,35", "90,68,35", "110,82,35", "105,78,35"
+    ].join("\n");
+    const rows = parseCSV(sampleCSV);
+    d3.select("#csv-status").text("Loaded sample data (25 rows across 5 horizons)");
+    renderCSVResult(rows);
+  });
+
+  /* ═══════════════════════════════════════
+     6) Horizon Lag Visualization
+     ═══════════════════════════════════════ */
+  (function () {
+    const container = d3.select("#lag-chart");
+    const cw = container.node().getBoundingClientRect().width;
+    const width = cw;
+    const height = Math.min(320, cw * 0.5);
+    const margin = { top: 25, right: 30, bottom: 35, left: 55 };
+    const iw = width - margin.left - margin.right;
+    const ih = height - margin.top - margin.bottom;
+
+    const svg = container.append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Generate a synthetic daily series (50 days)
+    const rngL = seededRandom(99);
+    const nDays = 50;
+    const series = [];
+    let sv = 100;
+    for (let i = 0; i < nDays; i++) {
+      sv += (rngL() - 0.48) * 5 + 0.2;
+      sv = Math.max(sv, 30);
+      series.push(sv);
+    }
+
+    const today = 25; // "today" marker
+    const x = d3.scaleLinear().domain([0, nDays - 1]).range([0, iw]);
+    const y = d3.scaleLinear().domain([d3.min(series) - 5, d3.max(series) + 10]).range([ih, 0]);
+
+    // X axis
+    g.append("g").attr("transform", `translate(0,${ih})`)
+      .call(d3.axisBottom(x).ticks(10).tickFormat(d => "d" + (d + 1)))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"));
+
+    // Y axis
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(5))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"));
+
+    // Grid
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(""))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.4));
+
+    // Known data (up to "today")
+    const knownData = series.slice(0, today + 1);
+    const lineGen = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX);
+
+    g.append("path").datum(knownData).attr("d", lineGen)
+      .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2.5);
+
+    // "Today" vertical line
+    g.append("line")
+      .attr("x1", x(today)).attr("x2", x(today))
+      .attr("y1", 0).attr("y2", ih)
+      .attr("stroke", accent).attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
+
+    g.append("text")
+      .attr("x", x(today)).attr("y", -8)
+      .attr("text-anchor", "middle").attr("fill", accent)
+      .style("font-size", "0.7rem").style("font-weight", "600").text("Today");
+
+    // For each horizon, draw the lag gap and prediction point
+    const horizonColors = ["#16a34a", "#2563eb", "#8b5cf6", "#ea580c", "#dc2626"];
+
+    HORIZONS.forEach((h, idx) => {
+      const targetDay = today + Math.round(h * nDays / 50); // scale to series
+      if (targetDay >= nDays) return;
+
+      const yRow = ih - 12 - idx * (ih / 6.5); // stagger vertically for labels
+      const targetVal = series[targetDay];
+      const color = horizonColors[idx];
+
+      // Lag arrow (horizontal bracket)
+      const x1 = x(today);
+      const x2 = x(targetDay);
+      const arrowY = y(targetVal);
+
+      // Dashed lag line
+      g.append("line")
+        .attr("x1", x1).attr("x2", x2)
+        .attr("y1", arrowY).attr("y2", arrowY)
+        .attr("stroke", color).attr("stroke-width", 1.5)
+        .attr("stroke-dasharray", "3 3").attr("opacity", 0.7);
+
+      // Prediction target dot
+      g.append("circle")
+        .attr("cx", x2).attr("cy", arrowY)
+        .attr("r", 5).attr("fill", color).attr("stroke", "#fff").attr("stroke-width", 1.5);
+
+      // Future series (faded)
+      const futureSlice = series.slice(today, targetDay + 1);
+      const futureLine = d3.line()
+        .x((d, i) => x(today + i)).y(d => y(d)).curve(d3.curveMonotoneX);
+
+      g.append("path").datum(futureSlice).attr("d", futureLine)
+        .attr("fill", "none").attr("stroke", color)
+        .attr("stroke-width", 1).attr("stroke-dasharray", "2 3").attr("opacity", 0.35);
+
+      // Horizon label
+      g.append("text")
+        .attr("x", x2 + 6).attr("y", arrowY + 4)
+        .attr("fill", color).style("font-size", "0.65rem").style("font-weight", "600")
+        .text(h + "d");
+    });
+
+    // Shaded "known" region
+    const knownArea = d3.area()
+      .x((d, i) => x(i)).y0(ih).y1(d => y(d)).curve(d3.curveMonotoneX);
+
+    g.insert("path", ":first-child").datum(knownData).attr("d", knownArea)
+      .attr("fill", teal).attr("opacity", 0.06);
+
+  })();
+
+  /* ═══════════════════════════════════════
+     7) Responsive resize
      ═══════════════════════════════════════ */
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       renderTSChart();
+      previousMapexData = null; // reset ghost on resize
       renderMAPExChart();
     }, 200);
   });
 
   /* ═══════════════════════════════════════
-     6) Intersection observer for animations
+     8) Intersection observer for animations
      ═══════════════════════════════════════ */
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
