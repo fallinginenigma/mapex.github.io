@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MAPEx — Understanding Mean Absolute Percentage Error Over Forecast Horizons</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -422,6 +424,54 @@
     .footer a { color: var(--accent); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
+    /* ── Impact table ── */
+    .impact-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+
+    .impact-table th {
+      background: var(--code-bg);
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      padding: 0.6rem 0.5rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .impact-table td {
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .impact-table td:hover {
+      background: var(--accent-light);
+    }
+
+    .impact-table td.current-month {
+      background: var(--teal-light);
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    .impact-table td.next-month {
+      background: var(--orange-light);
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    .impact-table td.both-months {
+      background: linear-gradient(135deg, var(--teal-light) 50%, var(--orange-light) 50%);
+      color: var(--text);
+      font-weight: 600;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 640px) {
       html { font-size: 16px; }
@@ -486,21 +536,10 @@
   </div>
 
   <div class="formula-card">
-    <div class="formula">
-      <span class="f-var">MAPE</span>
-      <span class="f-op">=</span>
-      <span class="f-op">(</span><span class="f-var">100%</span>
-      <span class="f-op"> / </span><span class="f-var">n</span><span class="f-op">)</span>
-      <span class="f-op"> × </span>
-      <span class="f-op">Σ</span>
-      <span class="f-op"> |</span><span class="f-actual">Aₜ</span>
-      <span class="f-op"> − </span><span class="f-pred">Fₜ</span><span class="f-op">|</span>
-      <span class="f-op"> / </span>
-      <span class="f-op">|</span><span class="f-actual">Aₜ</span><span class="f-op">|</span>
-    </div>
+    <div class="formula" id="mape-formula"></div>
     <span class="formula-label">
-      where <span class="f-actual">Aₜ</span> = actual value,
-      <span class="f-pred">Fₜ</span> = forecast value,
+      where <span class="f-actual">A<sub>t</sub></span> = actual value,
+      <span class="f-pred">F<sub>t</sub></span> = forecast value,
       <span class="f-var">n</span> = number of periods
     </span>
   </div>
@@ -514,7 +553,7 @@
   <h2>See MAPE in Action</h2>
   <p>
     The table below shows a simple example. <strong>Drag the sliders</strong> to change the
-    forecast values and watch MAPE update in real time.
+    actual values and watch MAPE update in real time. The forecasts are held constant.
   </p>
 
   <div class="vis-card">
@@ -524,7 +563,7 @@
         <thead>
           <tr>
             <th>Period</th>
-            <th>Actual (Aₜ)</th>
+            <th>Actual (Aₜ) — drag to edit</th>
             <th>Forecast (Fₜ)</th>
             <th>|Aₜ − Fₜ| / |Aₜ|</th>
           </tr>
@@ -535,24 +574,49 @@
     </div>
   </div>
 
+  <div class="callout callout-teal">
+    <strong>Higher actuals help MAPE:</strong> When actual values increase but forecast errors
+    stay the same in absolute terms, the percentage error decreases. For example, if forecast
+    is off by 10 units: 10/100 = 10% error, but 10/200 = 5% error. MAPE is a relative metric,
+    so larger denominators (actuals) reduce the percentage error.
+  </div>
+
   <hr class="divider">
 
-  <!-- ── Section 4: What is a Forecast Horizon? ── -->
-  <h2>What is a Forecast Horizon?</h2>
-  <p>
-    The <span class="highlight-orange">forecast horizon</span> is how far into the future your
-    model predicts. A 7-day horizon means predicting one week ahead; a 35-day horizon means
-    predicting five weeks ahead.
-  </p>
-  <p>
-    This is the <strong>"x"</strong> in <span class="highlight">MAPEx</span>. When we say
-    "MAPE over horizon x", we mean: <em>what is the MAPE when the model forecasts x steps
-    into the future?</em>
-  </p>
+  <!-- ── Section 4: Understanding Horizon and Time Bucket ── -->
+  <h2>Understanding Horizon and Time Bucket</h2>
+
+  <div class="step-cards">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h5>Horizon (H days)</h5>
+      <p>
+        The period that includes all transactional activities from day 1 to day H.
+        A 14-day horizon means forecasting for a consecutive 14-day window.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h5>Time Bucket</h5>
+      <p>
+        The aggregation period for estimates and actuals. For daily MAPEx,
+        each version has a bucket [V, V+H&minus;1] over which we sum forecasts and actuals.
+      </p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h5>Lag (Currently 0)</h5>
+      <p>
+        The delay between forecast generation and forecast period start.
+        Lag=0 means forecasts generated on Monday cover Monday+H days.
+        We use lag=0 for all MAPEx calculations.
+      </p>
+    </div>
+  </div>
 
   <div class="callout">
-    <strong>Key insight:</strong> Forecasting next week's sales is much easier than forecasting
-    sales three months from now. As the horizon increases, uncertainty accumulates — and so does error.
+    <strong>Example:</strong> On Monday Feb 16 with H=14 and lag=0, the forecast covers
+    Feb 16 &ndash; Mar 1 (14 days). The time bucket = forecast period = [Feb 16, Mar 1].
   </div>
 
   <!-- ── Section 5: Interactive Time Series + Horizon ── -->
@@ -630,6 +694,99 @@
     the <span class="highlight-orange">noise</span> in the data and the
     <span class="highlight-teal">trend strength</span>.
   </p>
+
+  <hr class="divider">
+
+  <!-- ── Daily Versions Section ── -->
+  <h2>The MAPEx Formula &mdash; Daily Versions</h2>
+  <p>
+    The correct MAPEx formula uses a <strong>rolling daily version</strong> approach.
+    For each day (version date), we create a forecast for the next H days and compare
+    it to actual values once they're available.
+  </p>
+
+  <div class="formula-card">
+    <div class="formula" id="mapex-formula-daily"></div>
+    <span class="formula-label">
+      where each version V has a time bucket [V, V+H&minus;1],<br>
+      TAE<sub>v</sub> = &Sigma;|F<sub>d</sub> &minus; A<sub>d</sub>| for d &isin; bucket,
+      Actuals<sub>v</sub> = &Sigma; A<sub>d</sub> for d &isin; bucket
+    </span>
+  </div>
+
+  <h3>Daily Versions Explained</h3>
+  <p>
+    For <strong>today = Feb 16, 2026</strong> and <strong>horizon = 14 days</strong>:
+  </p>
+  <ul style="margin:0.75rem 0 1.25rem 1.5rem;color:var(--text);">
+    <li><strong>Version Feb 3:</strong> Bucket = Feb 3&ndash;16 (14 days), all actuals available &#10003;</li>
+    <li><strong>Version Feb 2:</strong> Bucket = Feb 2&ndash;15 (14 days), all actuals available &#10003;</li>
+    <li>...going back to <strong>Version Jan 20:</strong> Bucket = Jan 20 &ndash; Feb 2</li>
+  </ul>
+  <p>
+    For February MAPEx (H=14), we aggregate versions from <strong>Jan 20 to Feb 3</strong>
+    (all versions where the bucket falls within or overlaps February and actuals are available).
+  </p>
+
+  <div class="vis-card">
+    <h4>Daily Versions Visualized &mdash; Rolling Windows</h4>
+    <div class="controls">
+      <div class="control-group">
+        <label>Horizon (H)</label>
+        <select id="daily-horizon-select" style="font-size:0.85rem;padding:0.3em 0.5em;border-radius:6px;border:1px solid var(--border);">
+          <option value="7">7 days</option>
+          <option value="14" selected>14 days</option>
+          <option value="21">21 days</option>
+          <option value="28">28 days</option>
+          <option value="35">35 days</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Show Version</label>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="range" id="version-slider" min="0" max="15" value="0" step="1">
+          <span class="value-display" id="version-date-display">Feb 3</span>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(109,40,217,0.08);border:1px dashed var(--accent)"></div> Time Bucket</div>
+    </div>
+    <div id="daily-versions-chart"></div>
+    <div class="mape-result" id="version-stats"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Forecast Revision Impact Grid ── -->
+  <h2>Forecast Revision Impact Across Horizons</h2>
+  <p>
+    When you edit a forecast in a specific week, it affects different horizon/month
+    combinations. The table below shows which months are impacted for each horizon.
+  </p>
+
+  <div class="vis-card">
+    <h4>Forecast Edit Impact Matrix</h4>
+    <table class="impact-table" id="impact-table">
+      <thead>
+        <tr>
+          <th>Editing Week</th>
+          <th>H=7 Days</th>
+          <th>H=14 Days</th>
+          <th>H=21 Days</th>
+          <th>H=28 Days</th>
+          <th>H=35 Days</th>
+        </tr>
+      </thead>
+      <tbody id="impact-body"></tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem;text-align:center;">
+      Click on a cell to see which months are affected by editing that week's forecast.
+    </p>
+    <div id="impact-result" class="mape-result" style="display:none;"></div>
+  </div>
 
   <hr class="divider">
 
@@ -826,9 +983,10 @@
 
   /* ═══════════════════════════════════════
      1) Interactive MAPE Calculator Table
+        Actuals are editable, Forecasts are constant
      ═══════════════════════════════════════ */
   const calcActuals = [100, 120, 90, 110, 105];
-  const calcForecasts = [95, 130, 85, 100, 115];
+  const calcForecasts = [95, 130, 85, 100, 115]; // constant
 
   function renderCalcTable() {
     const tbody = d3.select("#calc-body");
@@ -837,28 +995,33 @@
     let sumPctErr = 0;
     calcActuals.forEach((a, i) => {
       const f = calcForecasts[i];
-      const pctErr = Math.abs(a - f) / Math.abs(a);
+      const pctErr = a !== 0 ? Math.abs(a - f) / Math.abs(a) : 0;
       sumPctErr += pctErr;
 
       const tr = tbody.append("tr");
       tr.append("td").text("t" + (i + 1));
-      tr.append("td").attr("class", "col-actual").text(a);
-      const tdF = tr.append("td");
-      const inp = tdF.append("input")
+
+      // Actual column: editable slider
+      const tdA = tr.append("td");
+      const inp = tdA.append("input")
         .attr("type", "range")
-        .attr("min", Math.round(a * 0.5))
-        .attr("max", Math.round(a * 1.5))
-        .attr("value", f)
+        .attr("min", Math.round(f * 0.5))
+        .attr("max", Math.round(f * 2))
+        .attr("value", a)
         .style("width", "90px");
-      tdF.append("span")
-        .attr("class", "col-pred")
+      tdA.append("span")
+        .attr("class", "col-actual")
         .style("margin-left", "0.4rem")
         .style("font-family", "var(--mono)")
-        .text(f);
+        .text(a);
+
+      // Forecast column: constant display
+      tr.append("td").attr("class", "col-pred").text(f);
+
       tr.append("td").attr("class", "col-error").text((pctErr * 100).toFixed(1) + "%");
 
       inp.on("input", function () {
-        calcForecasts[i] = +this.value;
+        calcActuals[i] = +this.value;
         renderCalcTable();
       });
     });
@@ -915,6 +1078,11 @@
   const tsMargin = { top: 20, right: 20, bottom: 35, left: 50 };
   const tsContainer = d3.select("#ts-chart");
 
+  // Real calendar dates starting Feb 16, 2026
+  const tsToday = new Date(2026, 1, 16);
+  const tsDates = d3.range(N).map(i => new Date(tsToday.getTime() + i * 86400000));
+  const tsDateFmt = d3.timeFormat("%b %d");
+
   function renderTSChart() {
     tsContainer.selectAll("*").remove();
     const cw = tsContainer.node().getBoundingClientRect().width;
@@ -928,7 +1096,10 @@
     d3.select("#horizon-value").text(horizonDays);
     const forecasts = generateForecasts(horizonDays);
     const mape = computeMAPE(actuals, forecasts);
-    d3.select("#ts-mape").text("MAPE at horizon " + horizonDays + " days = " + mape.toFixed(2) + "%");
+    const targetDate = new Date(tsToday.getTime() + horizonDays * 86400000);
+    d3.select("#ts-mape").text(
+      "MAPE at horizon " + horizonDays + " days (target: " + tsDateFmt(targetDate) + ") = " + mape.toFixed(2) + "%"
+    );
 
     const svg = tsContainer.append("svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
@@ -936,15 +1107,15 @@
 
     const g = svg.append("g").attr("transform", `translate(${tsMargin.left},${tsMargin.top})`);
 
-    const x = d3.scaleLinear().domain([0, N - 1]).range([0, iw]);
+    const x = d3.scaleTime().domain([tsDates[0], tsDates[N - 1]]).range([0, iw]);
     const allVals = actuals.concat(forecasts);
     const y = d3.scaleLinear().domain([d3.min(allVals) - 5, d3.max(allVals) + 5]).range([ih, 0]);
 
     g.append("g").attr("transform", `translate(0,${ih})`)
-      .call(d3.axisBottom(x).ticks(10).tickFormat(d => "d" + ((d + 1) * 1)))
+      .call(d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat("%b %d")))
       .call(g => g.select(".domain").attr("stroke", border))
       .call(g => g.selectAll(".tick line").attr("stroke", border))
-      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"));
 
     g.append("g")
       .call(d3.axisLeft(y).ticks(6))
@@ -959,7 +1130,7 @@
 
     // Error area
     const area = d3.area()
-      .x((d, i) => x(i))
+      .x((d, i) => x(tsDates[i]))
       .y0((d, i) => y(Math.min(actuals[i], forecasts[i])))
       .y1((d, i) => y(Math.max(actuals[i], forecasts[i])))
       .curve(d3.curveMonotoneX);
@@ -967,7 +1138,7 @@
     g.append("path").datum(actuals).attr("d", area)
       .attr("fill", "rgba(234,88,12,0.12)").attr("stroke", "none");
 
-    const lineGen = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX);
+    const lineGen = d3.line().x((d, i) => x(tsDates[i])).y(d => y(d)).curve(d3.curveMonotoneX);
 
     g.append("path").datum(actuals).attr("d", lineGen)
       .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2.5);
@@ -977,10 +1148,10 @@
 
     g.selectAll(".dot-actual").data(actuals).enter()
       .append("circle")
-      .attr("cx", (d, i) => x(i)).attr("cy", d => y(d)).attr("r", 3).attr("fill", teal)
+      .attr("cx", (d, i) => x(tsDates[i])).attr("cy", d => y(d)).attr("r", 3).attr("fill", teal)
       .on("mouseover", function (evt, d) {
         const i = actuals.indexOf(d);
-        showTooltip(evt, `Day ${i + 1}<br>Actual: ${d}<br>Forecast: ${forecasts[i]}<br>Error: ${(Math.abs(d - forecasts[i]) / Math.abs(d) * 100).toFixed(1)}%`);
+        showTooltip(evt, `${tsDateFmt(tsDates[i])}<br>Actual: ${d}<br>Forecast: ${forecasts[i]}<br>Error: ${(Math.abs(d - forecasts[i]) / Math.abs(d) * 100).toFixed(1)}%`);
       })
       .on("mousemove", function (evt) { showTooltip(evt, tooltip.html()); })
       .on("mouseout", hideTooltip);
@@ -998,7 +1169,7 @@
 
   function computeMapexData(noise, trend) {
     const rng3 = seededRandom(77);
-    const N2 = 40;
+    const N2 = 60; // 60 days of data for daily versions
     const act2 = [];
     let v = 100;
     for (let i = 0; i < N2; i++) {
@@ -1007,15 +1178,35 @@
       act2.push(Math.round(v * 10) / 10);
     }
 
-    return HORIZONS.map(h => {
-      const rng4 = seededRandom(200 + h);
-      const factor = h / 7;
+    return HORIZONS.map(H => {
+      const rng4 = seededRandom(200 + H);
+
+      // Generate forecasts with horizon-dependent error
       const pred2 = act2.map(a => {
+        const factor = H / 7;
         const n = (rng4() - 0.5) * 2 * factor * noise * 0.6;
         const d = factor * trend * 0.15 * (rng4() - 0.4);
         return a + n + d;
       });
-      return { horizon: h, mape: computeMAPE(act2, pred2) };
+
+      // Compute MAPEx using daily versions (rolling window)
+      let totalTAE = 0;
+      let totalActuals = 0;
+      const maxVersion = N2 - H; // last version where bucket completes
+
+      for (let vi = 0; vi < maxVersion; vi++) {
+        let versionTAE = 0;
+        let versionActuals = 0;
+        for (let d = vi; d < vi + H; d++) {
+          versionTAE += Math.abs(pred2[d] - act2[d]);
+          versionActuals += act2[d];
+        }
+        totalTAE += versionTAE;
+        totalActuals += versionActuals;
+      }
+
+      const mape = (totalActuals > 0) ? (totalTAE / totalActuals) * 100 : 0;
+      return { horizon: H, mape };
     });
   }
 
@@ -1158,6 +1349,200 @@
   renderMAPExChart();
   d3.select("#noise-slider").on("input", renderMAPExChart);
   d3.select("#trend-slider").on("input", renderMAPExChart);
+
+  /* ═══════════════════════════════════════
+     3b) Daily Versions Demo
+     ═══════════════════════════════════════ */
+  const dailyMargin = { top: 20, right: 30, bottom: 50, left: 60 };
+
+  function renderDailyVersionsChart() {
+    const container = d3.select("#daily-versions-chart");
+    container.selectAll("*").remove();
+
+    const H = +d3.select("#daily-horizon-select").property("value");
+    const versionIdx = +d3.select("#version-slider").property("value");
+
+    // Generate 50 days of synthetic data starting Jan 1, 2026
+    const startDate = new Date(2026, 0, 1);
+    const nDays = 50;
+    const rngDaily = seededRandom(555);
+    const dailyActuals = [];
+    const dailyForecasts = [];
+    let dv = 100;
+
+    for (let i = 0; i < nDays; i++) {
+      dv += (rngDaily() - 0.48) * 6 + 0.5;
+      dv = Math.max(dv, 40);
+      const actual = Math.round(dv * 10) / 10;
+      dailyActuals.push(actual);
+      const horizonFactor = H / 7;
+      const forecast = actual + (rngDaily() - 0.5) * 10 * horizonFactor;
+      dailyForecasts.push(Math.round(forecast * 10) / 10);
+    }
+
+    // Today = Feb 16 = day index 46
+    const todayIdx = 46;
+    const maxVersionIdx = todayIdx - H + 1;
+    const versions = [];
+    for (let vi = Math.max(0, maxVersionIdx - 15); vi <= maxVersionIdx; vi++) {
+      versions.push(vi);
+    }
+
+    d3.select("#version-slider").attr("max", versions.length - 1);
+    const clampedIdx = Math.min(versionIdx, versions.length - 1);
+    const currentVersionIdx = versions[clampedIdx];
+    const versionDate = new Date(startDate.getTime() + currentVersionIdx * 86400000);
+    const dvFmt = d3.timeFormat("%b %d");
+    d3.select("#version-date-display").text(dvFmt(versionDate));
+
+    // Compute TAE and Actuals for this version's bucket
+    let tae = 0;
+    let actualsSum = 0;
+    for (let d = currentVersionIdx; d < currentVersionIdx + H && d < nDays; d++) {
+      tae += Math.abs(dailyForecasts[d] - dailyActuals[d]);
+      actualsSum += dailyActuals[d];
+    }
+    const versionMAPE = actualsSum > 0 ? (tae / actualsSum) * 100 : 0;
+    const bucketEndDate = new Date(versionDate.getTime() + (H - 1) * 86400000);
+
+    d3.select("#version-stats").html(
+      "<strong>Version " + dvFmt(versionDate) + ":</strong> Bucket [" + dvFmt(versionDate) + " \u2013 " + dvFmt(bucketEndDate) + "]<br>" +
+      "TAE = " + tae.toFixed(1) + ", Actuals = " + actualsSum.toFixed(1) + ", MAPE = " + versionMAPE.toFixed(2) + "%"
+    );
+
+    // Draw chart with bucket highlighted
+    const cw = container.node().getBoundingClientRect().width;
+    const width = cw;
+    const height = Math.min(300, cw * 0.45);
+    const iw = width - dailyMargin.left - dailyMargin.right;
+    const ih = height - dailyMargin.top - dailyMargin.bottom;
+
+    const svg = container.append("svg")
+      .attr("viewBox", "0 0 " + width + " " + height)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const gd = svg.append("g").attr("transform", "translate(" + dailyMargin.left + "," + dailyMargin.top + ")");
+
+    const dates = d3.range(nDays).map(i => new Date(startDate.getTime() + i * 86400000));
+    const xd = d3.scaleTime().domain([dates[0], dates[nDays - 1]]).range([0, iw]);
+    const yd = d3.scaleLinear().domain([30, d3.max(dailyActuals) + 10]).range([ih, 0]);
+
+    // Highlight bucket region
+    const bucketStart = dates[currentVersionIdx];
+    const bucketEnd = dates[Math.min(currentVersionIdx + H - 1, nDays - 1)];
+    gd.append("rect")
+      .attr("x", xd(bucketStart))
+      .attr("y", 0)
+      .attr("width", xd(bucketEnd) - xd(bucketStart))
+      .attr("height", ih)
+      .attr("fill", "rgba(109,40,217,0.08)")
+      .attr("stroke", accent)
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4 3");
+
+    // Axes
+    gd.append("g").attr("transform", "translate(0," + ih + ")")
+      .call(d3.axisBottom(xd).ticks(8).tickFormat(d3.timeFormat("%b %d")))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick line").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"));
+
+    gd.append("g")
+      .call(d3.axisLeft(yd).ticks(5))
+      .call(g => g.select(".domain").attr("stroke", border))
+      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"));
+
+    // Grid
+    gd.append("g")
+      .call(d3.axisLeft(yd).ticks(5).tickSize(-iw).tickFormat(""))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.4));
+
+    // Lines
+    const dvLine = d3.line().x(function(d, i) { return xd(dates[i]); }).y(function(d) { return yd(d); }).curve(d3.curveMonotoneX);
+
+    gd.append("path").datum(dailyActuals).attr("d", dvLine)
+      .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2);
+
+    gd.append("path").datum(dailyForecasts).attr("d", dvLine)
+      .attr("fill", "none").attr("stroke", orange).attr("stroke-width", 1.5).attr("stroke-dasharray", "4 2");
+
+    // Version date marker
+    gd.append("line")
+      .attr("x1", xd(versionDate)).attr("x2", xd(versionDate))
+      .attr("y1", 0).attr("y2", ih)
+      .attr("stroke", accent).attr("stroke-width", 2);
+
+    gd.append("text")
+      .attr("x", xd(versionDate))
+      .attr("y", -5)
+      .attr("text-anchor", "middle")
+      .attr("fill", accent)
+      .style("font-size", "0.7rem")
+      .style("font-weight", "600")
+      .text("Version Date");
+
+    // Today marker
+    if (todayIdx < nDays) {
+      gd.append("line")
+        .attr("x1", xd(dates[todayIdx])).attr("x2", xd(dates[todayIdx]))
+        .attr("y1", 0).attr("y2", ih)
+        .attr("stroke", red).attr("stroke-width", 1).attr("stroke-dasharray", "3 3");
+
+      gd.append("text")
+        .attr("x", xd(dates[todayIdx])).attr("y", -5)
+        .attr("text-anchor", "middle").attr("fill", red)
+        .style("font-size", "0.65rem").style("font-weight", "600")
+        .text("Today");
+    }
+  }
+
+  renderDailyVersionsChart();
+  d3.select("#daily-horizon-select").on("change", renderDailyVersionsChart);
+  d3.select("#version-slider").on("input", renderDailyVersionsChart);
+
+  /* ═══════════════════════════════════════
+     3c) Forecast Revision Impact Grid
+     ═══════════════════════════════════════ */
+  function renderImpactGrid() {
+    const tbody = d3.select("#impact-body");
+    tbody.selectAll("*").remove();
+
+    const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
+    const horizons = [7, 14, 21, 28, 35];
+
+    const impactMap = {
+      "Week 1": { 7: "M", 14: "M", 21: "M", 28: "M+1", 35: "M+1" },
+      "Week 2": { 7: "M", 14: "M", 21: "M, M+1", 28: "M+1", 35: "M+1, M+2" },
+      "Week 3": { 7: "M", 14: "M", 21: "M+1", 28: "M+1", 35: "M+2" },
+      "Week 4": { 7: "M", 14: "M, M+1", 21: "M+1", 28: "M+1", 35: "M+2" }
+    };
+
+    weeks.forEach(function(week) {
+      const tr = tbody.append("tr");
+      tr.append("td").text(week).style("font-weight", "600");
+
+      horizons.forEach(function(h) {
+        const impact = impactMap[week][h];
+        const td = tr.append("td").text(impact);
+
+        if (impact === "M") td.attr("class", "current-month");
+        else if (impact.indexOf(",") >= 0) td.attr("class", "both-months");
+        else td.attr("class", "next-month");
+
+        td.on("click", function() {
+          const rngImpact = seededRandom(week.charCodeAt(5) * 100 + h);
+          const improvement = (rngImpact() * 3 + 1).toFixed(2);
+          d3.select("#impact-result")
+            .style("display", "block")
+            .html("<strong>Editing " + week + " forecasts improves H=" + h + " MAPE by " + improvement + "%</strong><br>" +
+                  "<span style=\"font-size:0.8rem;\">Affected periods: " + impact + "</span>");
+        });
+      });
+    });
+  }
+
+  renderImpactGrid();
 
   /* ═══════════════════════════════════════
      4) Benchmark / Interpretation Chart
@@ -1500,11 +1885,55 @@
       renderTSChart();
       previousMapexData = null; // reset ghost on resize
       renderMAPExChart();
+      renderDailyVersionsChart();
     }, 200);
   });
 
   /* ═══════════════════════════════════════
-     8) Intersection observer for animations
+     8) KaTeX Formula Rendering
+     ═══════════════════════════════════════ */
+  function renderKaTeX() {
+    var mapeEl = document.getElementById('mape-formula');
+    var mapexEl = document.getElementById('mapex-formula-daily');
+
+    if (typeof katex !== 'undefined') {
+      if (mapeEl) {
+        katex.render(
+          String.raw`\text{MAPE} = \frac{100\%}{n} \times \sum_{t=1}^{n} \frac{|A_t - F_t|}{|A_t|}`,
+          mapeEl,
+          { displayMode: true, throwOnError: false }
+        );
+      }
+      if (mapexEl) {
+        katex.render(
+          String.raw`\text{MAPEx}_H = \frac{\displaystyle\sum_{\text{all versions}} \text{TAE}_v}{\displaystyle\sum_{\text{all versions}} \text{Actuals}_v}`,
+          mapexEl,
+          { displayMode: true, throwOnError: false }
+        );
+      }
+    }
+  }
+
+  // Wait for KaTeX to load then render
+  if (typeof katex !== 'undefined') {
+    renderKaTeX();
+  } else {
+    var katexScript = document.querySelector('script[src*="katex"]');
+    if (katexScript) {
+      katexScript.addEventListener('load', renderKaTeX);
+    }
+    // Fallback: poll for katex
+    var katexPoll = setInterval(function() {
+      if (typeof katex !== 'undefined') {
+        clearInterval(katexPoll);
+        renderKaTeX();
+      }
+    }, 100);
+    setTimeout(function() { clearInterval(katexPoll); }, 5000);
+  }
+
+  /* ═══════════════════════════════════════
+     9) Intersection observer for animations
      ═══════════════════════════════════════ */
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
