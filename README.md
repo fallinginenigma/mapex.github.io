@@ -2,7 +2,7 @@
 
 An interactive visual explainer for **Mean Absolute Percentage Error (MAPE)** across forecast horizons — inspired by [MLU-Explain](https://mlu-explain.github.io/).
 
-Live at [mapex.github.io](https://mapex.github.io).
+Live at [mapex.github.io](https://fallinginenigma.github.io/mapex.github.io).
 
 ## What's Inside
 
