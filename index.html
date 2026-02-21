@@ -226,6 +226,12 @@
       cursor: pointer;
       border: 2px solid #fff;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.25);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.35);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -235,6 +241,12 @@
       cursor: pointer;
       border: 2px solid #fff;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:active {
+      transform: scale(1.25);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.35);
     }
 
     /* ── Callout boxes ── */
@@ -622,7 +634,6 @@
 
 <!-- ══════════════ HERO ══════════════ -->
 <header class="hero">
-  <div class="hero-badge">Interactive Explainer</div>
   <h1>MAPE<span>x</span></h1>
   <p>A visual, interactive guide to <strong>Mean Absolute Percentage Error</strong> and how forecast accuracy changes across prediction horizons.</p>
 </header>
@@ -792,17 +803,12 @@
     how forecast quality degrades as we predict further into the future.
   </p>
 
-  <div class="callout callout-teal" style="font-size:0.88rem;">
-    <strong>Try it:</strong> Set noise to <strong>1</strong> vs <strong>8</strong> and see how the MAPEx curve changes. Higher noise shifts the entire curve upward.
-  </div>
-
   <div class="vis-card">
     <h4>MAPEx — MAPE at Each Forecast Horizon</h4>
     <div class="legend" style="margin-bottom:0.5rem;">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--accent)"></div> Model</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#d4d4d4"></div> Previous (ghost)</div>
       <div class="legend-item"><div class="legend-swatch" style="background:var(--teal);opacity:0.5"></div> Naive baseline</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(109,40,217,0.1);border:1px dashed var(--accent-mid)"></div> P10&ndash;P90 band</div>
     </div>
     <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.75rem;">Choose a demand pattern to see how MAPEx behaves under different scenarios:</p>
     <div class="scenario-btns" id="scenario-btns">
@@ -811,22 +817,6 @@
       <button class="scenario-btn" data-scenario="spike">Promo Spike</button>
       <button class="scenario-btn" data-scenario="newproduct">New Product Launch</button>
     </div>
-    <div class="controls">
-      <div class="control-group">
-        <label>Noise Level</label>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="noise-slider" min="1" max="10" value="4" step="1">
-          <span class="value-display" id="noise-value">4</span>
-        </div>
-      </div>
-      <div class="control-group">
-        <label>Trend Strength</label>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="trend-slider" min="0" max="10" value="3" step="1">
-          <span class="value-display" id="trend-value">3</span>
-        </div>
-      </div>
-    </div>
     <div id="mapex-chart"></div>
   </div>
 
@@ -834,9 +824,7 @@
 
   <p>
     Notice the characteristic upward shape: short horizons produce small errors, while
-    longer horizons produce progressively larger errors. The rate of increase depends on
-    the <span class="highlight-orange">noise</span> in the data and the
-    <span class="highlight-teal">trend strength</span>.
+    longer horizons produce progressively larger errors.
   </p>
 
   <hr class="divider">
@@ -1070,29 +1058,6 @@
     <div id="bias-summary" class="mape-result" style="margin-top:0.75rem;font-size:1rem;"></div>
   </div>
 
-  <hr class="divider">
-
-  <!-- ── Business Impact Translator ── -->
-  <h2>Business Impact Translator</h2>
-  <p>
-    MAPE percentages become meaningful when you translate them to dollars.
-    Enter your monthly revenue below to see how forecast error at each horizon
-    translates into potential inventory misallocation.
-  </p>
-
-  <div class="vis-card">
-    <h4>MAPE to Dollar Impact</h4>
-    <div class="controls">
-      <div class="control-group">
-        <label>Monthly Revenue ($)</label>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="revenue-slider" min="100000" max="10000000" value="1000000" step="100000">
-          <span class="value-display" id="revenue-value" style="min-width:7ch;">$1.0M</span>
-        </div>
-      </div>
-    </div>
-    <div class="impact-result-card" id="business-impact-cards"></div>
-  </div>
 
   <hr class="divider">
 
@@ -1283,15 +1248,22 @@
   const calcActuals = [100, 120, 90, 110, 105];
   const calcForecasts = [95, 130, 85, 100, 115]; // constant
 
+  function updateMapeDisplay() {
+    let sumPctErr = 0;
+    calcActuals.forEach((a, i) => {
+      const f = calcForecasts[i];
+      sumPctErr += a !== 0 ? Math.abs(a - f) / Math.abs(a) : 0;
+    });
+    d3.select("#mape-result").text("MAPE = " + ((sumPctErr / calcActuals.length) * 100).toFixed(2) + "%");
+  }
+
   function renderCalcTable() {
     const tbody = d3.select("#calc-body");
     tbody.selectAll("tr").remove();
 
-    let sumPctErr = 0;
     calcActuals.forEach((a, i) => {
       const f = calcForecasts[i];
       const pctErr = a !== 0 ? Math.abs(a - f) / Math.abs(a) : 0;
-      sumPctErr += pctErr;
 
       const tr = tbody.append("tr");
       tr.append("td").text("t" + (i + 1));
@@ -1302,27 +1274,31 @@
         .attr("type", "range")
         .attr("min", Math.round(f * 0.5))
         .attr("max", Math.round(f * 2))
+        .attr("step", "0.5")
         .attr("value", a)
         .style("width", "90px");
-      tdA.append("span")
+      const actualSpan = tdA.append("span")
         .attr("class", "col-actual")
         .style("margin-left", "0.4rem")
         .style("font-family", "var(--mono)")
-        .text(a);
+        .text(Math.round(a));
 
       // Forecast column: constant display
       tr.append("td").attr("class", "col-pred").text(f);
 
-      tr.append("td").attr("class", "col-error").text((pctErr * 100).toFixed(1) + "%");
+      const errorCell = tr.append("td").attr("class", "col-error").text((pctErr * 100).toFixed(1) + "%");
 
       inp.on("input", function () {
         calcActuals[i] = +this.value;
-        renderCalcTable();
+        const newA = calcActuals[i];
+        const newPctErr = newA !== 0 ? Math.abs(newA - f) / Math.abs(newA) : 0;
+        actualSpan.text(Math.round(newA));
+        errorCell.text((newPctErr * 100).toFixed(1) + "%");
+        updateMapeDisplay();
       });
     });
 
-    const mape = (sumPctErr / calcActuals.length) * 100;
-    d3.select("#mape-result").text("MAPE = " + mape.toFixed(2) + "%");
+    updateMapeDisplay();
   }
   renderCalcTable();
 
@@ -1524,28 +1500,25 @@
 
       mapeList.sort(function(a, b) { return a - b; });
       naiveMapeList.sort(function(a, b) { return a - b; });
-      var p10Idx = Math.floor(nSim * 0.1);
-      var p90Idx = Math.floor(nSim * 0.9);
       var medianIdx = Math.floor(nSim * 0.5);
 
       return {
         horizon: H,
         mape: mapeList[medianIdx],
-        p10: mapeList[p10Idx],
-        p90: mapeList[p90Idx],
         naive: naiveMapeList[medianIdx]
       };
     });
   }
 
+  var FIXED_NOISE = 4;
+  var FIXED_TREND = 3;
+
   function renderMAPExChart() {
     var container = d3.select("#mapex-chart");
     container.selectAll("*").remove();
 
-    var noise = +d3.select("#noise-slider").property("value");
-    var trend = +d3.select("#trend-slider").property("value");
-    d3.select("#noise-value").text(noise);
-    d3.select("#trend-value").text(trend);
+    var noise = FIXED_NOISE;
+    var trend = FIXED_TREND;
 
     var mapexData = computeMapexData(noise, trend, currentScenario);
 
@@ -1555,9 +1528,9 @@
     var iw = width - mapexMargin.left - mapexMargin.right;
     var ih = height - mapexMargin.top - mapexMargin.bottom;
 
-    // yMax includes bands + naive + ghost
+    // yMax includes naive + ghost
     var allVals = [];
-    mapexData.forEach(function(d) { allVals.push(d.mape, d.p90, d.naive); });
+    mapexData.forEach(function(d) { allVals.push(d.mape, d.naive); });
     if (previousMapexData) previousMapexData.forEach(function(d) { allVals.push(d.mape); });
     var yMax = d3.max(allVals) * 1.15;
 
@@ -1601,18 +1574,6 @@
       .call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(""))
       .call(function(g) { g.select(".domain").remove(); })
       .call(function(g) { g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5); });
-
-    // Confidence band (P10-P90 area)
-    var bandArea = d3.area()
-      .x(function(d) { return x(d.horizon) + x.bandwidth() / 2; })
-      .y0(function(d) { return y(d.p10); })
-      .y1(function(d) { return y(d.p90); })
-      .curve(d3.curveMonotoneX);
-
-    g.append("path").datum(mapexData).attr("d", bandArea)
-      .attr("fill", "rgba(109,40,217,0.1)")
-      .attr("stroke", "var(--accent-mid)").attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3 3").attr("opacity", 0.8);
 
     // Ghost bars (previous state)
     if (previousMapexData) {
@@ -1667,7 +1628,6 @@
       .on("mouseover", function (evt, d) {
         d3.select(this).attr("opacity", 0.8);
         var ttHtml = "Horizon: " + d.horizon + "d<br>Model MAPE: " + d.mape.toFixed(2) + "%";
-        ttHtml += "<br>P10\u2013P90: " + d.p10.toFixed(1) + "\u2013" + d.p90.toFixed(1) + "%";
         ttHtml += "<br><span style='color:" + teal + "'>Naive: " + d.naive.toFixed(2) + "%</span>";
         if (previousMapexData) {
           var prev = previousMapexData.find(function(p) { return p.horizon === d.horizon; });
@@ -1706,7 +1666,6 @@
 
     // Trigger downstream renders that depend on MAPEx data
     renderBiasChart(noise, trend, currentScenario);
-    renderBusinessImpact(mapexData);
     renderReforecastGuide(mapexData);
   }
 
@@ -1719,8 +1678,6 @@
   });
 
   renderMAPExChart();
-  d3.select("#noise-slider").on("input", renderMAPExChart);
-  d3.select("#trend-slider").on("input", renderMAPExChart);
 
   /* ═══════════════════════════════════════
      3b) Daily Versions Demo
@@ -2397,32 +2354,6 @@
       "Average bias: <strong>" + (avgBias >= 0 ? "+" : "") + avgBias.toFixed(2) + "%</strong> (" + biasDir + ")"
     );
   }
-
-  /* ═══════════════════════════════════════
-     8) Business Impact Translator
-     ═══════════════════════════════════════ */
-  function renderBusinessImpact(mapexData) {
-    if (!mapexData) return;
-    var container = d3.select("#business-impact-cards");
-    container.selectAll("*").remove();
-
-    var revenue = +d3.select("#revenue-slider").property("value");
-    var revLabel = revenue >= 1000000 ? "$" + (revenue / 1000000).toFixed(1) + "M" : "$" + (revenue / 1000).toFixed(0) + "K";
-    d3.select("#revenue-value").text(revLabel);
-
-    mapexData.forEach(function(d) {
-      var dollarImpact = revenue * (d.mape / 100);
-      var impactLabel = dollarImpact >= 1000000 ? "$" + (dollarImpact / 1000000).toFixed(2) + "M" : dollarImpact >= 1000 ? "$" + (dollarImpact / 1000).toFixed(0) + "K" : "$" + dollarImpact.toFixed(0);
-
-      var card = container.append("div").attr("class", "impact-metric");
-      card.append("div").attr("class", "metric-value").text(impactLabel);
-      card.append("div").attr("class", "metric-label").text("H=" + d.horizon + "d (" + d.mape.toFixed(1) + "%)");
-    });
-  }
-
-  d3.select("#revenue-slider").on("input", function() {
-    if (previousMapexData) renderBusinessImpact(previousMapexData);
-  });
 
   /* ═══════════════════════════════════════
      9) Weekly Forecast Change MAPEx Impact
