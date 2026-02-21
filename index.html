@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAPEx — Understanding Mean Absolute Percentage Error Over Forecast Horizons</title>
+  <title>MAPEx Error Calculator — Understanding Mean Absolute Percentage Error Over Forecast Horizons</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -635,14 +635,14 @@
 <!-- ══════════════ HERO ══════════════ -->
 <header class="hero">
   <h1>MAPE<span>x</span></h1>
-  <p>A visual, interactive guide to <strong>Mean Absolute Percentage Error</strong> and how forecast accuracy changes across prediction horizons.</p>
+  <p>A visual, interactive guide to <strong>Mean Absolute Percentage Error</strong> and how forecast error changes across prediction horizons.</p>
 </header>
 
 <!-- ══════════════ ARTICLE ══════════════ -->
 <main class="article">
 
   <!-- ── Section 1: What is Forecasting? ── -->
-  <h2>Why Forecast Accuracy Matters</h2>
+  <h2>Why Measuring Forecast Error Matters</h2>
   <p>
     Organizations use forecasts to predict future demand, revenue, inventory needs, and more.
     A forecast is only useful if it's <em>accurate enough</em> to drive good decisions. But how
@@ -844,6 +844,10 @@
       TAE<sub>v</sub> = &Sigma;|F<sub>d</sub> &minus; A<sub>d</sub>| for d &isin; bucket,
       Actuals<sub>v</sub> = &Sigma; A<sub>d</sub> for d &isin; bucket
     </span>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>Interpretation:</strong> MAPEx is a volume-weighted error metric. A lower percentage indicates a more accurate forecast. The goal is to minimize this value.
   </div>
 
   <h3>Daily Versions Explained</h3>
@@ -1107,7 +1111,7 @@
   <p>
     The shape of your MAPEx curve tells you how often you should update forecasts.
     If the curve is steep between adjacent horizons, frequent re-forecasting pays off.
-    If it's flat, you can forecast less often without losing accuracy.
+    If it's flat, you can forecast less often without significantly increasing error.
   </p>
 
   <div class="vis-card">
@@ -1127,7 +1131,7 @@
     </div>
     <div class="step-card" style="border-color:var(--accent-mid)">
       <h5>Horizon matters</h5>
-      <p>MAPEx reveals how accuracy degrades as you forecast further ahead — essential for setting expectations.</p>
+      <p>MAPEx reveals how error grows as you forecast further ahead — essential for setting expectations.</p>
     </div>
     <div class="step-card" style="border-color:var(--accent-mid)">
       <h5>Know the limits</h5>
@@ -1135,12 +1139,29 @@
     </div>
   </div>
 
+  <!-- ── About the MAPEx Metric ── -->
+  <div class="context-section" style="margin-top: 40px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+
+    <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px;">About the MAPEx Metric</h3>
+
+    <p><strong>MAPEx</strong> is our core metric for measuring demand planning forecast error. Unlike a standard Mean Absolute Percentage Error (MAPE), MAPEx is a <strong>volume-weighted</strong> measure.</p>
+
+    <ul>
+        <li><strong>Volume-Weighted:</strong> It aggregates all absolute errors first, then divides by the sum of all actuals. This means that high-volume products have a greater impact on the final score, which correctly reflects their business importance.</li>
+
+        <li><strong>Handles Zeroes:</strong> This method avoids the "division by zero" problem that occurs in standard MAPE when an actual value is zero.</li>
+
+        <li><strong>Forecast Horizon (X):</strong> In practice, MAPEx is always measured over a specific lead time or "horizon" (e.g., 7, 14, 21 days), denoted as MAPEx7, MAPEx14, etc. This calculator demonstrates the core formula used for any given horizon.</li>
+    </ul>
+
+  </div>
+
 </main>
 
 <!-- ══════════════ FOOTER ══════════════ -->
 <footer class="footer">
   <p>
-    <strong>MAPEx</strong> — An interactive explainer on forecast accuracy.
+    <strong>MAPEx</strong> — An interactive explainer on forecast error.
     Built with <a href="https://d3js.org/" target="_blank" rel="noopener">D3.js</a>.
   </p>
 </footer>
@@ -1335,15 +1356,19 @@
   }
 
   function computeMAPE(act, pred) {
-    let sum = 0;
-    let n = 0;
+    let totalAbsoluteError = 0;
+    let totalActual = 0;
     act.forEach((a, i) => {
-      if (a !== 0 && pred[i] !== undefined) {
-        sum += Math.abs(a - pred[i]) / Math.abs(a);
-        n++;
+      if (pred[i] !== undefined) {
+        totalAbsoluteError += Math.abs(a - pred[i]);
+        totalActual += a;
       }
     });
-    return n > 0 ? (sum / n) * 100 : 0;
+    if (totalActual === 0) {
+      return totalAbsoluteError > 0 ? Infinity : 0;
+    }
+    const mapexError = totalAbsoluteError / totalActual;
+    return mapexError * 100;
   }
 
   const tsMargin = { top: 20, right: 20, bottom: 35, left: 50 };
@@ -1369,7 +1394,7 @@
     const mape = computeMAPE(actuals, forecasts);
     const targetDate = new Date(tsToday.getTime() + horizonDays * 86400000);
     d3.select("#ts-mape").text(
-      "MAPE at horizon " + horizonDays + " days (target: " + tsDateFmt(targetDate) + ") = " + mape.toFixed(2) + "%"
+      "MAPEx at horizon " + horizonDays + " days (target: " + tsDateFmt(targetDate) + ") = " + (mape === Infinity ? "Error: Forecast with zero actuals" : mape.toFixed(2) + "%")
     );
 
     const svg = tsContainer.append("svg")
@@ -2020,7 +2045,7 @@
       const overallAct = rows.map(r => r.actual);
       const overallPred = rows.map(r => r.forecast);
       const overallMape = computeMAPE(overallAct, overallPred);
-      d3.select("#csv-mape-result").text("Overall MAPE = " + overallMape.toFixed(2) + "%");
+      d3.select("#csv-mape-result").text("Overall MAPEx Error = " + (overallMape === Infinity ? "Error: Forecast with zero actuals" : overallMape.toFixed(2) + "%"));
 
       // Draw MAPEx bar chart
       const container = d3.select("#csv-mapex-chart");
@@ -2084,7 +2109,7 @@
       const act = rows.map(r => r.actual);
       const pred = rows.map(r => r.forecast);
       const mape = computeMAPE(act, pred);
-      d3.select("#csv-mape-result").text("MAPE = " + mape.toFixed(2) + "% (" + rows.length + " rows)");
+      d3.select("#csv-mape-result").text("MAPEx Error = " + (mape === Infinity ? "Error: Forecast with zero actuals" : mape.toFixed(2) + "% (" + rows.length + " rows)"));
       d3.select("#csv-mapex-chart").append("p")
         .attr("class", "muted")
         .style("text-align", "center").style("font-size", "0.82rem")
@@ -2531,11 +2556,11 @@
       recIcon = "&#128337;";
       recText = "Your MAPEx curve has <strong>moderate slope</strong> (avg +" + avgPerDay.toFixed(2) + "%/day). " +
         "The steepest jump is at <strong>" + steepest.label + "</strong>. " +
-        "<strong>Weekly</strong> re-forecasting should capture most accuracy gains.";
+        "<strong>Weekly</strong> re-forecasting should capture most error reduction.";
     } else {
       recIcon = "&#9989;";
       recText = "Your MAPEx curve is <strong>relatively flat</strong> (avg +" + avgPerDay.toFixed(2) + "%/day). " +
-        "Even <strong>bi-weekly or monthly</strong> re-forecasting should maintain reasonable accuracy. " +
+        "Even <strong>bi-weekly or monthly</strong> re-forecasting should keep error levels manageable. " +
         "The flattest segment: <strong>" + flattest.label + "</strong>.";
     }
 
