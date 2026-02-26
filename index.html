@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,11 +31,10 @@
       --card-bg: #ffffff;
       --code-bg: #EEF2F9;
       --serif: 'Source Serif 4', Georgia, serif;
-      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
       --mono: 'Fira Code', 'SF Mono', monospace;
-      --serif: 'Inter', system-ui, sans-serif;
-      --max-w: 700px;
-      --wide-max-w: 1280px;
+      --max-w: 740px;
+      --wide-max-w: 960px;
     }
 
     html { scroll-behavior: smooth; font-size: 18px; }
@@ -71,11 +69,10 @@
     }
 
     .hero h1 {
-      font-family: var(--sans);
-      font-size: clamp(2.4rem, 6vw, 3.8rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+      font-family: var(--serif);
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.15;
       color: var(--text);
       max-width: 800px;
       margin: 0 auto 1rem;
@@ -92,23 +89,21 @@
     }
 
     /* ── Article body ── */
-    .article { max-width: var(--wide-max-w); margin: 0 auto; padding: 3rem 2.5rem 5rem; }
+    .article { max-width: var(--max-w); margin: 0 auto; padding: 3rem 1.5rem 5rem; }
 
     .article h2 {
-      font-family: var(--sans);
-      font-size: clamp(1.45rem, 2.2vw, 1.85rem);
+      font-family: var(--serif);
+      font-size: 1.8rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
       margin: 3.5rem 0 1rem;
       color: var(--text);
     }
 
     .article h3 {
-      font-family: var(--sans);
-      font-size: 1.2rem;
+      font-family: var(--serif);
+      font-size: 1.3rem;
       font-weight: 600;
-      letter-spacing: -0.01em;
-      margin: 2rem 0 0.65rem;
+      margin: 2.5rem 0 0.75rem;
     }
 
     .article p { margin-bottom: 1.25rem; color: var(--text); }
@@ -621,88 +616,7 @@
       color: var(--accent);
     }
 
-    /* ── Text-width cap for readability in wide layout ── */
-    .text-cap { max-width: 700px; }
-    .text-cap-sm { max-width: 580px; }
-
-    /* ── Two-column section split ── */
-    .section-split {
-      display: grid;
-      grid-template-columns: minmax(260px, 380px) 1fr;
-      gap: 3.5rem;
-      align-items: start;
-    }
-    .split-text { }
-    .split-text > h2:first-child { margin-top: 0.25rem; }
-    .split-text > *:first-child { margin-top: 0; }
-    .split-chart { }
-
-    /* Model toggle buttons for MAPEx chart */
-    .model-btns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-      align-items: center;
-    }
-    .model-btn {
-      font-family: var(--sans);
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 0.35em 0.9em;
-      border-radius: 100px;
-      border: 2px solid;
-      background: transparent;
-      cursor: pointer;
-      transition: all 0.18s;
-      display: flex;
-      align-items: center;
-      gap: 0.35em;
-    }
-    .model-btn .swatch {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    }
-    .model-btn.inactive { opacity: 0.35; }
-    .model-btn:hover { opacity: 1; }
-
-    /* KaTeX formula cards in split layout */
-    .formula-card-inline {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.25rem 1.25rem 0.75rem;
-      margin: 1rem 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      overflow-x: auto;
-    }
-    .formula-card-inline .formula-note {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 0.6rem;
-      line-height: 1.5;
-    }
-    .formula-card-inline.inside { border-left: 3px solid var(--teal); }
-    .formula-card-inline.outside { border-left: 3px solid var(--red); }
-
-    /* Scenario note muted */
-    .scenario-note { font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.6rem; }
-
-    /* Divider in split context */
-    .section-divider {
-      border: none;
-      height: 1px;
-      background: var(--border);
-      margin: 2.5rem 0;
-    }
-
     /* ── Responsive ── */
-    @media (max-width: 900px) {
-      .section-split {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-    }
-
     @media (max-width: 640px) {
       html { font-size: 16px; }
       .hero { padding: 3rem 1.25rem 2.5rem; }
@@ -852,94 +766,66 @@
   </div>
 
   <!-- ── Section 5: Interactive Time Series + Horizon ── -->
-  <hr class="divider">
-  <div class="section-split">
-    <div class="split-text">
-      <h2>Forecasts Across Horizons</h2>
-      <p>
-        The chart shows actual demand (solid line) and forecasts at different horizons.
-        Use the slider to change the horizon — watch how predictions diverge from reality
-        as you look further ahead.
-      </p>
-      <p>
-        The shaded region is the absolute error. At short horizons the model closely tracks
-        actuals; at 35 days the gap widens visibly.
-      </p>
-      <div class="controls" style="margin-top:1.5rem;">
-        <div class="control-group">
-          <label>Forecast Horizon (x)</label>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <input type="range" id="horizon-slider" min="0" max="4" value="0" step="1">
-            <span class="value-display" id="horizon-value">7</span>
-            <span style="font-size:0.78rem;color:var(--text-muted);">days ahead</span>
-          </div>
+  <h2>Forecasts Across Horizons</h2>
+  <p>
+    The chart below shows actual values (solid line) and forecasts at different horizons.
+    Use the slider to change the forecast horizon and observe how the predictions diverge from
+    reality as we look further ahead.
+  </p>
+
+  <div class="vis-card">
+    <h4>Actual vs. Forecast — Adjustable Horizon</h4>
+    <div class="controls">
+      <div class="control-group">
+        <label>Forecast Horizon (x)</label>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="range" id="horizon-slider" min="0" max="4" value="0" step="1">
+          <span class="value-display" id="horizon-value">7</span>
+          <span style="font-size:0.78rem;color:var(--text-muted);">days ahead</span>
         </div>
       </div>
     </div>
-    <div class="split-chart">
-      <div class="vis-card">
-        <h4>Actual vs. Forecast — Adjustable Horizon</h4>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:rgba(204,0,0,0.15)"></div> Error region</div>
-        </div>
-        <div id="ts-chart"></div>
-        <div id="ts-mape" class="mape-result" style="margin-top:0.75rem;"></div>
-      </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(204,0,0,0.15)"></div> Error region</div>
     </div>
+    <div id="ts-chart"></div>
+    <div id="ts-mape" class="mape-result" style="margin-top:0.75rem;"></div>
   </div>
 
-  <!-- ── Section 6: MAPE vs Horizon ── -->
   <hr class="divider">
+
+  <!-- ── Section 6: MAPE vs Horizon ── -->
   <h2>MAPEx: Error Grows with Horizon</h2>
-  <p class="text-cap">
-    Each bar shows MAPEx at that horizon — computed as <strong>Σ|errors| / Σ actuals</strong>
-    across all rolling version windows (not divided by H itself, so high-volume days always
-    dominate the denominator). Toggle models below to compare how different forecasting
-    strategies degrade across horizons.
+  <p>
+    Now let's plot the MAPE <em>itself</em> for each horizon. This is the MAPEx curve — it shows
+    how forecast quality degrades as we predict further into the future.
   </p>
 
   <div class="vis-card">
     <h4>MAPEx — MAPE at Each Forecast Horizon</h4>
-
-    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-start;margin-bottom:1rem;">
-      <div>
-        <p class="scenario-note">Demand scenario:</p>
-        <div class="scenario-btns" id="scenario-btns">
-          <button class="scenario-btn active" data-scenario="stable">Stable</button>
-          <button class="scenario-btn" data-scenario="seasonal">Seasonal</button>
-          <button class="scenario-btn" data-scenario="spike">Promo Spike</button>
-          <button class="scenario-btn" data-scenario="newproduct">New Product</button>
-        </div>
-      </div>
-      <div>
-        <p class="scenario-note">Models to compare:</p>
-        <div class="model-btns" id="model-btns">
-          <button class="model-btn" data-model="mlModel" style="border-color:#003DA5;color:#003DA5;">
-            <span class="swatch" style="background:#003DA5;"></span>ML Model
-          </button>
-          <button class="model-btn" data-model="naive" style="border-color:#C8D2E4;color:#4A5C7A;">
-            <span class="swatch" style="background:#C8D2E4;"></span>Naive
-          </button>
-          <button class="model-btn" data-model="ma7" style="border-color:#007B5F;color:#007B5F;">
-            <span class="swatch" style="background:#007B5F;"></span>MA-7
-          </button>
-          <button class="model-btn" data-model="ets" style="border-color:#0068B4;color:#0068B4;">
-            <span class="swatch" style="background:#0068B4;"></span>Exp. Smoothing
-          </button>
-          <button class="model-btn" data-model="linTrend" style="border-color:#8B4A00;color:#8B4A00;">
-            <span class="swatch" style="background:#8B4A00;"></span>Linear Trend
-          </button>
-        </div>
-      </div>
+    <div class="legend" style="margin-bottom:0.5rem;">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--accent)"></div> Model</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d4d4d4"></div> Previous (ghost)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal);opacity:0.5"></div> Naive baseline</div>
     </div>
-
+    <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.75rem;">Choose a demand pattern to see how MAPEx behaves under different scenarios:</p>
+    <div class="scenario-btns" id="scenario-btns">
+      <button class="scenario-btn active" data-scenario="stable">Stable Demand</button>
+      <button class="scenario-btn" data-scenario="seasonal">Seasonal</button>
+      <button class="scenario-btn" data-scenario="spike">Promo Spike</button>
+      <button class="scenario-btn" data-scenario="newproduct">New Product Launch</button>
+    </div>
     <div id="mapex-chart"></div>
-    <p class="muted" style="margin-top:0.5rem;font-size:0.78rem;">
-      ML Model = simulated autoregressive forecast. Naive = last-known value (persistence). MA-7 = 7-day moving average. Exp. Smoothing = α=0.3 ETS. Linear Trend = OLS extrapolation on last 10 known values.
-    </p>
   </div>
+
+  <p class="muted" style="text-align:center;margin-top:0.5rem;">In this demo, we simulate a recursive model: each step uses the previous forecast as input, so errors accumulate.</p>
+
+  <p>
+    Notice the characteristic upward shape: short horizons produce small errors, while
+    longer horizons produce progressively larger errors.
+  </p>
 
   <hr class="divider">
 
@@ -1177,70 +1063,63 @@
   <hr class="divider">
 
   <!-- ── Section 11: Horizon Lag Visualization ── -->
-  <hr class="divider">
-  <div class="section-split">
-    <div class="split-text">
-      <h2>Understanding Horizon Lag</h2>
+  <h2>Understanding Horizon Lag</h2>
 
-      <div class="callout callout-teal">
-        <strong>Two types of lag:</strong> <strong>Publication lag</strong> (fixed at 0 here) is
-        the delay between when a forecast is issued and when its window starts.
-        <strong>Information lag</strong> (shown here) is the gap between the last known data
-        point and the prediction target — it grows with horizon regardless of publication lag.
-      </div>
-
-      <p>
-        When you forecast at horizon <span class="highlight-orange">x</span>, the model can only
-        use data available <em>today</em> to predict <em>x days from now</em>. Each colored dot
-        marks a target the model must predict using only the solid teal region as input.
-      </p>
-      <p>
-        At <span class="highlight">7 days</span> (<span id="lag-date-7"></span>), recent patterns
-        are highly relevant. By <span class="highlight-orange">35 days</span>
-        (<span id="lag-date-35"></span>), the model must bridge a five-week gap — demand patterns,
-        seasonality, and events can all shift. This is why MAPEx rises steeply with horizon.
-      </p>
-    </div>
-    <div class="split-chart">
-      <div class="vis-card">
-        <h4>Horizon Lag — What the Model "Sees" vs. What It Must Predict</h4>
-        <div id="lag-chart"></div>
-      </div>
-    </div>
+  <div class="callout callout-teal">
+    <strong>Note:</strong> This section discusses <strong>information lag</strong> — the gap between
+    the latest available data and the prediction target. This is different from the
+    <strong>publication lag</strong> (set to 0 throughout this page), which is the delay between
+    when a forecast is generated and when its coverage period begins. Even with publication lag = 0,
+    information lag grows with horizon because the model must predict further from its most recent
+    observations.
   </div>
+
+  <p>
+    When you forecast at horizon <span class="highlight-orange">x</span>, you're predicting
+    the value <em>x days from now</em> using only data available <em>today</em>. The gap between
+    the last known data point and the prediction target is the <strong>information lag</strong>.
+  </p>
+  <p>
+    The visualization below shows this for each horizon. The solid region is known data,
+    the gap is the lag (the blind spot), and the point at the end is what the model must predict.
+    As the horizon grows, the lag grows — and the model has less relevant information to work with.
+  </p>
+
+  <div class="vis-card">
+    <h4>Horizon Lag — What the Model "Sees" vs. What It Must Predict</h4>
+    <div id="lag-chart"></div>
+  </div>
+
+  <p>
+    At <span class="highlight">day 7</span> (<span id="lag-date-7"></span>), the model predicts just one week out — the lag is
+    short and recent patterns are still relevant. By <span class="highlight-orange">day 35</span>
+    (<span id="lag-date-35"></span>), the model must bridge a five-week gap, during which demand patterns, seasonality, and external
+    factors can all shift. This is why MAPEx increases with horizon.
+  </p>
+
+  <hr class="divider">
 
   <!-- ── Bias Visualization ── -->
-  <hr class="divider">
-  <div class="section-split">
-    <div class="split-text">
-      <h2>Forecast Bias by Horizon</h2>
-      <p>
-        MAPEx measures <em>absolute</em> error — it treats over-forecasting and under-forecasting
-        equally in magnitude. But the <strong>direction</strong> of error matters too.
-      </p>
-      <p>
-        A model that consistently over-forecasts by 10% produces 10% MAPEx, and so does one
-        that consistently under-forecasts by 10% — yet the business impact is very different
-        (overstock vs. stockout). The signed error chart reveals this hidden bias.
-      </p>
-      <p>
-        Positive bars mean the model predicts <span style="color:var(--orange);font-weight:600;">too high</span>;
-        negative bars mean it predicts <span style="color:var(--teal);font-weight:600;">too low</span>.
-        A flat signed error across horizons suggests consistent bias, not just growing uncertainty.
-      </p>
+  <h2>Forecast Bias by Horizon</h2>
+  <p>
+    MAPE measures absolute error, but it hides the <em>direction</em> of mistakes.
+    The chart below shows the <strong>mean signed error</strong> at each horizon.
+    Positive values mean the model over-forecasts (predicts too high);
+    negative values mean it under-forecasts.
+  </p>
+
+  <div class="vis-card">
+    <h4>Signed Forecast Error by Horizon</h4>
+    <div class="legend" style="margin-bottom:0.5rem;">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Over-forecast (+)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Under-forecast (&minus;)</div>
     </div>
-    <div class="split-chart">
-      <div class="vis-card">
-        <h4>Signed Forecast Error by Horizon</h4>
-        <div class="legend" style="margin-bottom:0.5rem;">
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Over-forecast (+)</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Under-forecast (&minus;)</div>
-        </div>
-        <div id="bias-chart"></div>
-        <div id="bias-summary" class="mape-result" style="margin-top:0.75rem;font-size:1rem;"></div>
-      </div>
-    </div>
+    <div id="bias-chart"></div>
+    <div id="bias-summary" class="mape-result" style="margin-top:0.75rem;font-size:1rem;"></div>
   </div>
+
+
+  <hr class="divider">
 
   <!-- ── Weekly Forecast Change MAPEx Impact ── -->
   <h2>Weekly Forecast Change &mdash; MAPEx Impact</h2>
@@ -1284,68 +1163,20 @@
   <hr class="divider">
 
   <!-- ── Re-forecast Frequency Guide ── -->
-  <hr class="divider">
-  <div class="section-split" style="align-items:start;">
-    <div class="split-text">
-      <h2>When to Re-forecast</h2>
-      <p>
-        The key question is: <strong>does revising a forecast on day&nbsp;<em>d</em> actually
-        move your MAPEx score?</strong> The answer depends entirely on whether day&nbsp;<em>d</em>
-        falls <em>inside</em> or <em>outside</em> the horizon window being measured.
-      </p>
+  <h2>When to Re-forecast</h2>
+  <p>
+    The shape of your MAPEx curve tells you how often you should update forecasts.
+    If the curve is steep between adjacent horizons, frequent re-forecasting pays off.
+    If it's flat, you can forecast less often without significantly increasing error.
+  </p>
 
-      <h3>The MAPEx formula</h3>
-      <p>
-        For horizon&nbsp;<em>H</em>, MAPEx is aggregated over all rolling version dates&nbsp;<em>V</em>.
-        Each version covers the bucket <span style="font-family:var(--mono);">[V,&nbsp;V+H−1]</span>:
-      </p>
-      <div class="formula-card-inline">
-        <div id="reforecast-formula-main"></div>
-        <p class="formula-note">TAE<sub>V</sub> = total absolute error in version V's bucket &nbsp;|&nbsp; denominator is total actuals, <em>not</em> H.</p>
-      </div>
-
-      <h3 style="color:var(--teal);">✓ Revising inside the horizon</h3>
-      <p>
-        If day&nbsp;<em>d</em> is inside at least one version's bucket
-        (<span style="font-family:var(--mono);">d ∈ [V, V+H−1]</span>),
-        the revision changes TAE<sub>V</sub> by the signed difference in absolute error:
-      </p>
-      <div class="formula-card-inline inside">
-        <div id="reforecast-formula-inside"></div>
-        <p class="formula-note">
-          The number of versions affected equals min(<em>d</em>, <em>H</em>−1) + 1 — a day near the
-          <em>end</em> of the horizon is covered by fewer versions, so the MAPEx impact is smaller.
-        </p>
-      </div>
-
-      <h3 style="color:var(--red);">✗ Revising outside the horizon</h3>
-      <p>
-        If day&nbsp;<em>d</em> falls outside every version's bucket for the horizon being measured,
-        TAE<sub>V</sub> is unchanged for all V:
-      </p>
-      <div class="formula-card-inline outside">
-        <div id="reforecast-formula-outside"></div>
-        <p class="formula-note">
-          This is the most common "wasted revision" — a planner edits a forecast that falls
-          beyond the H-day window and sees no movement in MAPEx<sub>H</sub>.
-        </p>
-      </div>
-
-      <div class="callout callout-teal" style="margin-top:1.25rem;">
-        <strong>Rule of thumb:</strong> if your MAPEx curve gains more than ~0.15 pp/day between
-        two adjacent horizons, re-forecasting at that frequency will produce measurable improvement.
-        The chart on the right shows the marginal gain per day for your current scenario.
-      </div>
-    </div>
-
-    <div class="split-chart">
-      <div class="vis-card">
-        <h4>Marginal MAPEx Gain — Re-forecasting Frequency</h4>
-        <div id="reforecast-chart"></div>
-        <div id="reforecast-recommendation" class="reforecast-recommendation" style="margin-top:1rem;"></div>
-      </div>
-    </div>
+  <div class="vis-card">
+    <h4>Optimal Re-forecasting Frequency</h4>
+    <div id="reforecast-chart"></div>
+    <div id="reforecast-recommendation" class="reforecast-recommendation" style="margin-top:1rem;"></div>
   </div>
+
+  <hr class="divider">
 
   <!-- ── Section 12: Takeaways ── -->
   <h2>Key Takeaways</h2>
@@ -1859,21 +1690,9 @@ const DemandGenerator = (() => {
         with ghost bars, confidence bands, naive
         baseline, and scenario support
      ═══════════════════════════════════════ */
-  const mapexMargin = { top: 24, right: 30, bottom: 40, left: 58 };
+  const mapexMargin = { top: 20, right: 30, bottom: 40, left: 55 };
   let previousMapexData = null;
   let currentScenario = "stable";
-
-  // Which models are currently visible (toggled on)
-  var activeModels = { mlModel: true, naive: false, ma7: false, ets: false, linTrend: false };
-
-  // Model display config
-  var modelConfig = {
-    mlModel:  { label: "ML Model",        color: accent,    dash: "none",  width: 2.5 },
-    naive:    { label: "Naive",           color: ghost,     dash: "5 3",   width: 1.8 },
-    ma7:      { label: "MA-7",            color: teal,      dash: "8 3",   width: 2 },
-    ets:      { label: "Exp. Smoothing",  color: blue,      dash: "3 3",   width: 2 },
-    linTrend: { label: "Linear Trend",    color: "#8B4A00", dash: "6 2 2 2", width: 2 }
-  };
 
   // Scenario demand pattern generators
   const scenarios = {
@@ -1883,25 +1702,14 @@ const DemandGenerator = (() => {
     newproduct: function(rng, i, base) { return base * (0.3 + 0.7 * Math.min(i / 40, 1)) + (rng() - 0.5) * 5; }
   };
 
-  function computeModelMAPEx(predictions, act2, H) {
-    var totalTAE = 0, totalActuals = 0;
-    var maxV = act2.length - H;
-    for (var vi = 0; vi < maxV; vi++) {
-      for (var di = vi; di < vi + H; di++) {
-        totalTAE += Math.abs(predictions[di] - act2[di]);
-        totalActuals += act2[di];
-      }
-    }
-    return totalActuals > 0 ? (totalTAE / totalActuals) * 100 : null;
-  }
-
   function computeMapexData(noise, trend, scenario) {
     var sc = scenarios[scenario] || scenarios.stable;
     var N2 = 60;
-    var nSim = 20;
+    var nSim = 20; // simulations for confidence bands
 
     return HORIZONS.map(function(H) {
-      var lists = { mlModel: [], naive: [], ma7: [], ets: [], linTrend: [] };
+      var mapeList = [];
+      var naiveMapeList = [];
 
       for (var sim = 0; sim < nSim; sim++) {
         var rng3 = seededRandom(77 + sim * 13);
@@ -1914,69 +1722,43 @@ const DemandGenerator = (() => {
           act2.push(Math.round(v * 10) / 10);
         }
 
-        // ML Model: simulated autoregressive with horizon-dependent noise
         var rng4 = seededRandom(200 + H + sim * 7);
-        var mlPred = act2.map(function(a) {
+        var pred2 = act2.map(function(a) {
           var factor = H / 7;
           var n = (rng4() - 0.5) * 2 * factor * noise * 0.6;
-          var d2 = factor * trend * 0.15 * (rng4() - 0.4);
-          return a + n + d2;
+          var d = factor * trend * 0.15 * (rng4() - 0.4);
+          return a + n + d;
         });
 
-        // Naive: last known value at H steps back
-        var naivePred = act2.map(function(a, idx) {
-          return idx >= H ? act2[idx - H] : act2[0];
+        // Naive forecast: use last known value (persistence)
+        var naive2 = act2.map(function(a, idx) {
+          return idx >= H ? act2[idx - H] : a;
         });
 
-        // MA-7: average of 7 known values ending H steps back
-        var ma7Pred = act2.map(function(a, idx) {
-          var lb = idx - H;
-          if (lb < 0) return act2[0];
-          var sum = 0, cnt = 0;
-          for (var k = Math.max(0, lb - 6); k <= lb; k++) { sum += act2[k]; cnt++; }
-          return sum / cnt;
-        });
-
-        // Exp. Smoothing (α=0.3) up to known data H steps back
-        var alpha = 0.3;
-        var etsPred = new Array(N2).fill(act2[0]);
-        for (var k = 1; k < N2; k++) {
-          var lb2 = k - H;
-          if (lb2 <= 0) { etsPred[k] = act2[0]; continue; }
-          etsPred[k] = alpha * act2[lb2] + (1 - alpha) * etsPred[k - 1];
-        }
-
-        // Linear Trend: OLS on last 10 known values, extrapolate H steps forward
-        var linPred = act2.map(function(a, idx) {
-          var lb3 = idx - H;
-          if (lb3 < 2) return act2[0];
-          var nPts = Math.min(10, lb3 + 1);
-          var start = lb3 - nPts + 1;
-          var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-          for (var k = start; k <= lb3; k++) {
-            var x2 = k - start;
-            sumX += x2; sumY += act2[k]; sumXY += x2 * act2[k]; sumX2 += x2 * x2;
+        var totalTAE = 0, totalActuals = 0;
+        var naiveTAE = 0, naiveActuals = 0;
+        var maxV = N2 - H;
+        for (var vi = 0; vi < maxV; vi++) {
+          for (var d = vi; d < vi + H; d++) {
+            totalTAE += Math.abs(pred2[d] - act2[d]);
+            totalActuals += act2[d];
+            naiveTAE += Math.abs(naive2[d] - act2[d]);
+            naiveActuals += act2[d];
           }
-          var denom = nPts * sumX2 - sumX * sumX;
-          var slope = denom !== 0 ? (nPts * sumXY - sumX * sumY) / denom : 0;
-          var intercept = (sumY - slope * sumX) / nPts;
-          return Math.max(5, intercept + slope * (lb3 - start + H));
-        });
-
-        lists.mlModel.push(computeModelMAPEx(mlPred, act2, H));
-        lists.naive.push(computeModelMAPEx(naivePred, act2, H));
-        lists.ma7.push(computeModelMAPEx(ma7Pred, act2, H));
-        lists.ets.push(computeModelMAPEx(etsPred, act2, H));
-        lists.linTrend.push(computeModelMAPEx(linPred, act2, H));
+        }
+        if (totalActuals > 0) mapeList.push((totalTAE / totalActuals) * 100);
+        if (naiveActuals > 0) naiveMapeList.push((naiveTAE / naiveActuals) * 100);
       }
 
-      var result = { horizon: H };
-      Object.keys(lists).forEach(function(key) {
-        var lst = lists[key].filter(function(x) { return x !== null; });
-        lst.sort(function(a, b) { return a - b; });
-        result[key] = lst[Math.floor(lst.length * 0.5)] || 0;
-      });
-      return result;
+      mapeList.sort(function(a, b) { return a - b; });
+      naiveMapeList.sort(function(a, b) { return a - b; });
+      var medianIdx = Math.floor(nSim * 0.5);
+
+      return {
+        horizon: H,
+        mape: mapeList[medianIdx],
+        naive: naiveMapeList[medianIdx]
+      };
     });
   }
 
@@ -1994,19 +1776,15 @@ const DemandGenerator = (() => {
 
     var cw = container.node().getBoundingClientRect().width;
     var width = cw;
-    var height = Math.min(380, cw * 0.48);
+    var height = Math.min(360, cw * 0.55);
     var iw = width - mapexMargin.left - mapexMargin.right;
     var ih = height - mapexMargin.top - mapexMargin.bottom;
 
-    // yMax across all active models
+    // yMax includes naive + ghost
     var allVals = [];
-    mapexData.forEach(function(d) {
-      Object.keys(activeModels).forEach(function(m) {
-        if (activeModels[m] && d[m] != null) allVals.push(d[m]);
-      });
-    });
-    if (allVals.length === 0) allVals = [10];
-    var yMax = d3.max(allVals) * 1.2;
+    mapexData.forEach(function(d) { allVals.push(d.mape, d.naive); });
+    if (previousMapexData) previousMapexData.forEach(function(d) { allVals.push(d.mape); });
+    var yMax = d3.max(allVals) * 1.15;
 
     var svg = container.append("svg")
       .attr("viewBox", "0 0 " + width + " " + height)
@@ -2014,9 +1792,12 @@ const DemandGenerator = (() => {
 
     var g = svg.append("g").attr("transform", "translate(" + mapexMargin.left + "," + mapexMargin.top + ")");
 
-    var x = d3.scaleBand().domain(HORIZONS).range([0, iw]).padding(0.28);
+    var x = d3.scaleBand().domain(HORIZONS).range([0, iw]).padding(0.25);
     var y = d3.scaleLinear().domain([0, yMax]).range([ih, 0]);
-    var xMid = function(H) { return x(H) + x.bandwidth() / 2; };
+
+    var colorScale = d3.scaleSequential()
+      .domain([0, yMax])
+      .interpolator(d3.interpolateRgb(accent, orange));
 
     // Axes
     g.append("g").attr("transform", "translate(0," + ih + ")")
@@ -2025,7 +1806,7 @@ const DemandGenerator = (() => {
       .call(function(g) { g.selectAll(".tick line").attr("stroke", border); })
       .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"); });
 
-    g.append("text").attr("x", iw / 2).attr("y", ih + 34)
+    g.append("text").attr("x", iw / 2).attr("y", ih + 35)
       .attr("text-anchor", "middle").attr("fill", textMuted)
       .style("font-size", "0.72rem").text("Forecast Horizon (days)");
 
@@ -2036,98 +1817,106 @@ const DemandGenerator = (() => {
       .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.65rem"); });
 
     g.append("text").attr("transform", "rotate(-90)")
-      .attr("x", -ih / 2).attr("y", -44)
+      .attr("x", -ih / 2).attr("y", -42)
       .attr("text-anchor", "middle").attr("fill", textMuted)
-      .style("font-size", "0.72rem").text("MAPEx (%)");
+      .style("font-size", "0.72rem").text("MAPE (%)");
 
-    // Grid lines
+    // Grid
     g.append("g")
       .call(d3.axisLeft(y).ticks(6).tickSize(-iw).tickFormat(""))
       .call(function(g) { g.select(".domain").remove(); })
-      .call(function(g) { g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.45); });
+      .call(function(g) { g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.5); });
 
-    // ML Model bars (primary model only, when active)
-    if (activeModels.mlModel) {
-      var colorScale = d3.scaleSequential()
-        .domain([0, yMax])
-        .interpolator(d3.interpolateRgb(accent, orange));
-
-      g.selectAll(".horizon-bar")
-        .data(mapexData)
+    // Ghost bars (previous state)
+    if (previousMapexData) {
+      g.selectAll(".ghost-bar")
+        .data(previousMapexData)
         .enter()
         .append("rect")
-        .attr("class", "horizon-bar")
+        .attr("class", "ghost-bar")
         .attr("x", function(d) { return x(d.horizon); })
         .attr("width", x.bandwidth())
-        .attr("y", ih).attr("height", 0).attr("rx", 4)
-        .attr("fill", function(d) { return colorScale(d.mlModel); })
-        .on("mouseover", function(evt, d) {
-          d3.select(this).attr("opacity", 0.8);
-          var tt = "H=" + d.horizon + "d";
-          Object.keys(activeModels).forEach(function(m) {
-            if (activeModels[m]) tt += "<br><span style='color:" + modelConfig[m].color + "'>" + modelConfig[m].label + ": " + d[m].toFixed(2) + "%</span>";
-          });
-          showTooltip(evt, tt);
-        })
-        .on("mousemove", function(evt) { showTooltip(evt, tooltip.html()); })
-        .on("mouseout", function() { d3.select(this).attr("opacity", 1); hideTooltip(); })
-        .transition().duration(600).delay(function(d, i) { return i * 50; })
-        .attr("y", function(d) { return y(d.mlModel); })
-        .attr("height", function(d) { return ih - y(d.mlModel); });
+        .attr("y", function(d) { return y(d.mape); })
+        .attr("height", function(d) { return ih - y(d.mape); })
+        .attr("rx", 4)
+        .attr("fill", ghost)
+        .attr("opacity", 0.5);
 
-      g.selectAll(".bar-label")
-        .data(mapexData)
-        .enter()
-        .append("text")
-        .attr("x", function(d) { return xMid(d.horizon); })
-        .attr("y", function(d) { return y(d.mlModel) - 5; })
-        .attr("text-anchor", "middle").attr("fill", textMuted)
-        .style("font-size", "0.58rem").style("font-family", "var(--mono)")
-        .style("opacity", 0).text(function(d) { return d.mlModel.toFixed(1) + "%"; })
-        .transition().duration(600).delay(function(d, i) { return i * 50 + 300; })
-        .style("opacity", 1);
+      var ghostLine = previousMapexData.map(function(d) { return [x(d.horizon) + x.bandwidth() / 2, y(d.mape)]; });
+      g.append("path").datum(ghostLine)
+        .attr("d", d3.line().curve(d3.curveMonotoneX))
+        .attr("fill", "none").attr("stroke", ghost)
+        .attr("stroke-width", 2).attr("stroke-dasharray", "3 4").attr("opacity", 0.6);
     }
 
-    // Overlay lines for each active model
-    var lineGen = d3.line()
-      .x(function(d) { return d[0]; })
-      .y(function(d) { return d[1]; })
+    // Naive baseline line
+    var naiveLine = d3.line()
+      .x(function(d) { return x(d.horizon) + x.bandwidth() / 2; })
+      .y(function(d) { return y(d.naive); })
       .curve(d3.curveMonotoneX);
 
-    Object.keys(activeModels).forEach(function(m) {
-      if (!activeModels[m]) return;
-      var cfg = modelConfig[m];
-      var pts = mapexData.map(function(d) { return [xMid(d.horizon), y(d[m])]; });
+    g.append("path").datum(mapexData).attr("d", naiveLine)
+      .attr("fill", "none").attr("stroke", teal)
+      .attr("stroke-width", 2).attr("stroke-dasharray", "6 4").attr("opacity", 0.5);
 
-      // Line
-      g.append("path").datum(pts)
-        .attr("d", lineGen)
-        .attr("fill", "none")
-        .attr("stroke", cfg.color)
-        .attr("stroke-width", cfg.width)
-        .attr("stroke-dasharray", cfg.dash === "none" ? null : cfg.dash)
-        .attr("opacity", m === "mlModel" ? 0.65 : 0.85);
+    // Naive baseline dots
+    g.selectAll(".naive-dot").data(mapexData).enter()
+      .append("circle")
+      .attr("cx", function(d) { return x(d.horizon) + x.bandwidth() / 2; })
+      .attr("cy", function(d) { return y(d.naive); })
+      .attr("r", 3.5).attr("fill", teal).attr("opacity", 0.5);
 
-      // Dots
-      g.selectAll(".dot-" + m).data(mapexData).enter()
-        .append("circle")
-        .attr("class", "dot-" + m)
-        .attr("cx", function(d) { return xMid(d.horizon); })
-        .attr("cy", function(d) { return y(d[m]); })
-        .attr("r", 4.5)
-        .attr("fill", cfg.color)
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
-        .on("mouseover", function(evt, d) {
-          var tt = "<strong>H=" + d.horizon + "d — " + cfg.label + "</strong><br>MAPEx: " + d[m].toFixed(2) + "%";
-          showTooltip(evt, tt);
-        })
-        .on("mousemove", function(evt) { showTooltip(evt, tooltip.html()); })
-        .on("mouseout", hideTooltip);
-    });
+    // Current bars
+    g.selectAll(".horizon-bar")
+      .data(mapexData)
+      .enter()
+      .append("rect")
+      .attr("class", "horizon-bar")
+      .attr("x", function(d) { return x(d.horizon); })
+      .attr("width", x.bandwidth())
+      .attr("y", ih).attr("height", 0)
+      .attr("rx", 4)
+      .attr("fill", function(d) { return colorScale(d.mape); })
+      .on("mouseover", function (evt, d) {
+        d3.select(this).attr("opacity", 0.8);
+        var ttHtml = "Horizon: " + d.horizon + "d<br>Model MAPE: " + d.mape.toFixed(2) + "%";
+        ttHtml += "<br><span style='color:" + teal + "'>Naive: " + d.naive.toFixed(2) + "%</span>";
+        if (previousMapexData) {
+          var prev = previousMapexData.find(function(p) { return p.horizon === d.horizon; });
+          if (prev) ttHtml += "<br><span style='color:" + ghost + "'>Previous: " + prev.mape.toFixed(2) + "%</span>";
+        }
+        showTooltip(evt, ttHtml);
+      })
+      .on("mousemove", function (evt) { showTooltip(evt, tooltip.html()); })
+      .on("mouseout", function () { d3.select(this).attr("opacity", 1); hideTooltip(); })
+      .transition().duration(600).delay(function(d, i) { return i * 50; })
+      .attr("y", function(d) { return y(d.mape); })
+      .attr("height", function(d) { return ih - y(d.mape); });
 
-    // Store for downstream features
+    // Value labels
+    g.selectAll(".bar-label")
+      .data(mapexData)
+      .enter()
+      .append("text")
+      .attr("x", function(d) { return x(d.horizon) + x.bandwidth() / 2; })
+      .attr("y", function(d) { return y(d.mape) - 6; })
+      .attr("text-anchor", "middle").attr("fill", textMuted)
+      .style("font-size", "0.6rem").style("font-family", "var(--mono)")
+      .style("opacity", 0).text(function(d) { return d.mape.toFixed(1) + "%"; })
+      .transition().duration(600).delay(function(d, i) { return i * 50 + 300; })
+      .style("opacity", 1);
+
+    // Trend line
+    var lineData = mapexData.map(function(d) { return [x(d.horizon) + x.bandwidth() / 2, y(d.mape)]; });
+    g.append("path").datum(lineData)
+      .attr("d", d3.line().curve(d3.curveMonotoneX))
+      .attr("fill", "none").attr("stroke", accent)
+      .attr("stroke-width", 2).attr("stroke-dasharray", "4 3").attr("opacity", 0.5);
+
+    // Store for ghost + downstream features
     previousMapexData = mapexData;
+
+    // Trigger downstream renders that depend on MAPEx data
     renderBiasChart(noise, trend, currentScenario);
     renderReforecastGuide(mapexData);
   }
@@ -2137,19 +1926,6 @@ const DemandGenerator = (() => {
     d3.selectAll("#scenario-btns .scenario-btn").classed("active", false);
     d3.select(this).classed("active", true);
     currentScenario = d3.select(this).attr("data-scenario");
-    renderMAPExChart();
-  });
-
-  // Model toggle button wiring
-  d3.selectAll("#model-btns .model-btn").each(function() {
-    var m = d3.select(this).attr("data-model");
-    if (activeModels[m]) d3.select(this).classed("inactive", false);
-    else d3.select(this).classed("inactive", true);
-  });
-  d3.selectAll("#model-btns .model-btn").on("click", function() {
-    var m = d3.select(this).attr("data-model");
-    activeModels[m] = !activeModels[m];
-    d3.select(this).classed("inactive", !activeModels[m]);
     renderMAPExChart();
   });
 
@@ -3041,9 +2817,6 @@ const DemandGenerator = (() => {
   function renderKaTeX() {
     var mapeEl = document.getElementById('mape-formula');
     var mapexEl = document.getElementById('mapex-formula-daily');
-    var rfMain = document.getElementById('reforecast-formula-main');
-    var rfInside = document.getElementById('reforecast-formula-inside');
-    var rfOutside = document.getElementById('reforecast-formula-outside');
 
     if (typeof katex !== 'undefined') {
       if (mapeEl) {
@@ -3057,27 +2830,6 @@ const DemandGenerator = (() => {
         katex.render(
           String.raw`\text{MAPEx}_H = \frac{\displaystyle\sum_{\text{all versions}} \text{TAE}_v}{\displaystyle\sum_{\text{all versions}} \text{Actuals}_v}`,
           mapexEl,
-          { displayMode: true, throwOnError: false }
-        );
-      }
-      if (rfMain) {
-        katex.render(
-          String.raw`\text{MAPEx}_H = \frac{\sum_V \text{TAE}_V}{\sum_V \text{Actuals}_V}, \qquad \text{TAE}_V = \sum_{d=V}^{V+H-1}\bigl|F_d^{(V)} - A_d\bigr|`,
-          rfMain,
-          { displayMode: true, throwOnError: false }
-        );
-      }
-      if (rfInside) {
-        katex.render(
-          String.raw`d \in [V,\; V{+}H{-}1] \;\Rightarrow\; \Delta\text{MAPEx}_H = \frac{\bigl|F_d^{\text{new}} - A_d\bigr| - \bigl|F_d^{\text{old}} - A_d\bigr|}{\sum_V \text{Actuals}_V}`,
-          rfInside,
-          { displayMode: true, throwOnError: false }
-        );
-      }
-      if (rfOutside) {
-        katex.render(
-          String.raw`d \notin [V,\; V{+}H{-}1] \;\Rightarrow\; \Delta\text{TAE}_V = 0 \;\Rightarrow\; \Delta\text{MAPEx}_H = 0`,
-          rfOutside,
           { displayMode: true, throwOnError: false }
         );
       }
