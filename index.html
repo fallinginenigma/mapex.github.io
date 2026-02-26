@@ -14,22 +14,22 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #fafaf9;
-      --text: #1c1917;
-      --text-muted: #57534e;
-      --accent: #6d28d9;
-      --accent-light: #ede9fe;
-      --accent-mid: #a78bfa;
-      --orange: #ea580c;
-      --orange-light: #fff7ed;
-      --teal: #0d9488;
-      --teal-light: #f0fdfa;
-      --red: #dc2626;
-      --blue: #2563eb;
-      --green: #16a34a;
-      --border: #e7e5e4;
+      --bg: #F5F7FA;
+      --text: #1B2A4A;
+      --text-muted: #4A5C7A;
+      --accent: #003DA5;
+      --accent-light: #E6EBF7;
+      --accent-mid: #4D79C0;
+      --orange: #CC0000;
+      --orange-light: #FDEAEA;
+      --teal: #007B5F;
+      --teal-light: #E6F2EF;
+      --red: #CC0000;
+      --blue: #0068B4;
+      --green: #007B5F;
+      --border: #D0D8E8;
       --card-bg: #ffffff;
-      --code-bg: #f5f5f4;
+      --code-bg: #EEF2F9;
       --serif: 'Source Serif 4', Georgia, serif;
       --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
       --mono: 'Fira Code', 'SF Mono', monospace;
@@ -231,7 +231,7 @@
 
     input[type="range"]::-webkit-slider-thumb:active {
       transform: scale(1.25);
-      box-shadow: 0 2px 8px rgba(109,40,217,0.35);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.35);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -246,7 +246,7 @@
 
     input[type="range"]::-moz-range-thumb:active {
       transform: scale(1.25);
-      box-shadow: 0 2px 8px rgba(109,40,217,0.35);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.35);
     }
 
     /* ── Callout boxes ── */
@@ -290,7 +290,7 @@
 
     .step-card:hover {
       border-color: var(--accent-mid);
-      box-shadow: 0 2px 8px rgba(109,40,217,0.08);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.08);
     }
 
     .step-card .step-num {
@@ -721,10 +721,10 @@
   </div>
 
   <div class="callout callout-teal">
-    <strong>Higher actuals help MAPE:</strong> When actual values increase but forecast errors
-    stay the same in absolute terms, the percentage error decreases. For example, if forecast
-    is off by 10 units: 10/100 = 10% error, but 10/200 = 5% error. MAPE is a relative metric,
-    so larger denominators (actuals) reduce the percentage error.
+    <strong>Larger denominators shrink MAPE:</strong> When actuals increase but absolute errors
+    stay constant, percentage error falls (e.g., 10/100 = 10% vs. 10/200 = 5%). This is a
+    property of the metric, not a sign of improved forecasting. Be cautious when comparing
+    MAPE across products or periods with very different volume levels.
   </div>
 
   <hr class="divider">
@@ -788,7 +788,7 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
       <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(234,88,12,0.15)"></div> Error region</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(204,0,0,0.15)"></div> Error region</div>
     </div>
     <div id="ts-chart"></div>
     <div id="ts-mape" class="mape-result" style="margin-top:0.75rem;"></div>
@@ -831,6 +831,43 @@
 
   <!-- ── Daily Versions Section ── -->
   <h2>The MAPEx Formula &mdash; Daily Versions</h2>
+
+  <div class="callout" style="background:var(--orange-light);border-left-color:var(--orange);">
+    <strong>⚠️ Important Distinction: MAPE ≠ MAPEx</strong>
+    <p style="margin:0.5rem 0 0.75rem;">
+      Standard <strong>MAPE</strong> averages individual percentage errors — each period contributes equally
+      regardless of volume. <strong>MAPEx</strong> is a <em>volume-weighted</em> metric (also known as
+      WMAPE): it sums all absolute errors, then divides by the sum of all actuals. This means
+      high-volume periods dominate MAPEx while low-volume periods dominate standard MAPE.
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;font-family:var(--mono);">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:0.4rem 0.6rem;background:rgba(0,0,0,0.05);border:1px solid var(--border);">Metric</th>
+          <th style="text-align:left;padding:0.4rem 0.6rem;background:rgba(0,0,0,0.05);border:1px solid var(--border);">Formula Style</th>
+          <th style="text-align:left;padding:0.4rem 0.6rem;background:rgba(0,0,0,0.05);border:1px solid var(--border);">Weighting</th>
+          <th style="text-align:left;padding:0.4rem 0.6rem;background:rgba(0,0,0,0.05);border:1px solid var(--border);">Zero-Safe?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);font-weight:600;">MAPE</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);">Mean of (|error|&nbsp;/&nbsp;actual) per period</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);">Equal-weight</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);color:var(--red);">No</td>
+        </tr>
+        <tr>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);font-weight:600;">MAPEx</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);">&Sigma;|errors|&nbsp;/&nbsp;&Sigma;&nbsp;actuals over bucket</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);">Volume-weight</td>
+          <td style="padding:0.35rem 0.6rem;border:1px solid var(--border);color:var(--teal);">Partially</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin:0.6rem 0 0;font-size:0.85rem;">
+      The rest of this page uses the <strong>MAPEx</strong> (volume-weighted) definition unless stated otherwise.
+    </p>
+  </div>
   <p>
     The correct MAPEx formula uses a <strong>rolling daily version</strong> approach.
     For each day (version date), we create a forecast for the next H days and compare
@@ -884,7 +921,7 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
       <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(109,40,217,0.08);border:1px dashed var(--accent)"></div> Time Bucket</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,61,165,0.08);border:1px dashed var(--accent)"></div> Time Bucket</div>
     </div>
     <div id="daily-versions-chart"></div>
     <div class="mape-result" id="version-stats"></div>
@@ -928,8 +965,8 @@
   <div class="step-cards">
     <div class="step-card">
       <div class="step-num" style="background:var(--orange)">1</div>
-      <h5>Error Accumulation</h5>
-      <p>Recursive models feed predictions back as inputs. Small errors compound at each step.</p>
+      <h5>Error Accumulation (Recursive Models)</h5>
+      <p>Autoregressive models feed predictions back as inputs, so a small error at step <em>t</em> shifts the input at step <em>t+1</em>, causing errors to compound. Even <strong>direct models</strong> (which predict each horizon independently) show growing error — not from compounding, but because mapping current features to a distant target is inherently harder to learn.</p>
     </div>
     <div class="step-card">
       <div class="step-num" style="background:var(--orange)">2</div>
@@ -970,10 +1007,19 @@
   </div>
 
   <p>
-    <strong>Asymmetric penalty:</strong> MAPE penalizes over-forecasts more heavily than
-    under-forecasts. A forecast of 150 when actual is 100 gives 50% error, but a forecast
-    of 50 when actual is 100 also gives 50%. However, there's no upper bound for over-forecasting
-    errors while under-forecasting errors cap at 100%.
+    <strong>Asymmetric penalty:</strong> MAPE penalizes over-forecasts and under-forecasts unevenly
+    due to the actual value sitting in the denominator. Consider two scenarios with the same
+    absolute miss of 50 units:
+  </p>
+  <ul style="margin:0.5rem 0 1rem 1.5rem;color:var(--text);line-height:1.8;">
+    <li><strong>Over-forecast:</strong> Actual&nbsp;=&nbsp;100, Forecast&nbsp;=&nbsp;150 &rarr; |100&nbsp;&minus;&nbsp;150|&nbsp;/&nbsp;100 = <strong>50%</strong></li>
+    <li><strong>Under-forecast:</strong> Actual&nbsp;=&nbsp;150, Forecast&nbsp;=&nbsp;100 &rarr; |150&nbsp;&minus;&nbsp;100|&nbsp;/&nbsp;150 = <strong>33%</strong></li>
+  </ul>
+  <p>
+    Same absolute error, different MAPE — because the denominator changes. More importantly,
+    over-forecast errors have no upper bound (a forecast of 1000 when actual is 100 = 900%),
+    while under-forecast errors are capped at 100% (forecast of 0 when actual is 100 = 100%).
+    This asymmetry can systematically bias model selection toward under-forecasting.
   </p>
 
   <p>
@@ -1018,10 +1064,20 @@
 
   <!-- ── Section 11: Horizon Lag Visualization ── -->
   <h2>Understanding Horizon Lag</h2>
+
+  <div class="callout callout-teal">
+    <strong>Note:</strong> This section discusses <strong>information lag</strong> — the gap between
+    the latest available data and the prediction target. This is different from the
+    <strong>publication lag</strong> (set to 0 throughout this page), which is the delay between
+    when a forecast is generated and when its coverage period begins. Even with publication lag = 0,
+    information lag grows with horizon because the model must predict further from its most recent
+    observations.
+  </div>
+
   <p>
     When you forecast at horizon <span class="highlight-orange">x</span>, you're predicting
     the value <em>x days from now</em> using only data available <em>today</em>. The gap between
-    the last known data point and the prediction target is the <strong>lag</strong>.
+    the last known data point and the prediction target is the <strong>information lag</strong>.
   </p>
   <p>
     The visualization below shows this for each horizon. The solid region is known data,
@@ -1149,7 +1205,7 @@
     <ul>
         <li><strong>Volume-Weighted:</strong> It aggregates all absolute errors first, then divides by the sum of all actuals. This means that high-volume products have a greater impact on the final score, which correctly reflects their business importance.</li>
 
-        <li><strong>Handles Zeroes:</strong> This method avoids the "division by zero" problem that occurs in standard MAPE when an actual value is zero.</li>
+        <li><strong>Handles Zeroes (Mostly):</strong> Because MAPEx divides total absolute error by the <em>sum</em> of all actuals across the bucket (rather than averaging individual ratios), a single zero-actual period doesn't cause a division-by-zero — it simply contributes zero to the denominator sum. However, if <em>all</em> actual values within the entire bucket are zero (e.g., a new product with no sales history in the forecast window), MAPEx is still undefined. For truly intermittent demand, consider complementary metrics like RMSSE or coverage-based measures.</li>
 
         <li><strong>Forecast Horizon (X):</strong> In practice, MAPEx is always measured over a specific lead time or "horizon" (e.g., 7, 14, 21 days), denoted as MAPEx7, MAPEx14, etc. This calculator demonstrates the core formula used for any given horizon.</li>
     </ul>
@@ -1169,20 +1225,191 @@
 <!-- ══════════════ TOOLTIP ══════════════ -->
 <div class="tooltip" id="tooltip"></div>
 
+<!-- ══════════════ DEMAND GENERATOR PANEL ══════════════ -->
+<div id="demand-gen-panel" style="
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: #0A1F44;
+  border: 1px solid rgba(77,121,192,0.5);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  font-family: inherit;
+  color: #E6EBF7;
+">
+  <span style="font-size: 13px; font-weight: 700; opacity: 0.9; white-space:nowrap;">&#x1F3B2; Demand</span>
+  <select id="scenario-select" style="
+    background: #0D2B5E;
+    color: #E6EBF7;
+    border: 1px solid rgba(77,121,192,0.4);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  ">
+    <option value="stable">Stable</option>
+    <option value="seasonal">Seasonal</option>
+    <option value="promo">Promo Spike</option>
+    <option value="newProduct">New Product</option>
+  </select>
+  <button id="randomize-btn" style="
+    background: linear-gradient(135deg, #003DA5, #0068B4);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+  " onmousedown="this.style.transform='scale(0.95)'"
+     onmouseup="this.style.transform='scale(1)'"
+  >
+    Randomize &#x21BB;
+  </button>
+  <span id="seed-display" style="font-size: 11px; opacity: 0.4; min-width:4ch;"></span>
+</div>
+
+<!-- ══════════════ DEMAND GENERATOR ══════════════ -->
+<script>
+/**
+ * MAPEx Random Demand Generator
+ * Global module — call DemandGenerator.generate(scenario) to get a full dataset.
+ */
+const DemandGenerator = (() => {
+  function randBetween(min, max) { return Math.random() * (max - min) + min; }
+  function randInt(min, max) { return Math.floor(randBetween(min, max + 1)); }
+  function gaussianNoise(mean, stddev) {
+    mean = mean || 0; stddev = stddev || 1;
+    const u1 = Math.random(), u2 = Math.random();
+    return mean + stddev * Math.sqrt(-2 * Math.log(u1 || 1e-10)) * Math.cos(2 * Math.PI * u2);
+  }
+
+  const HORIZONS = [7, 14, 21, 28, 35];
+  const NUM_DAYS = 90;
+
+  function stableDemand() {
+    const baseLevel = randInt(80, 200);
+    const noise = randBetween(5, 15);
+    const actuals = [];
+    for (let d = 0; d < NUM_DAYS; d++) {
+      actuals.push(Math.max(1, Math.round(baseLevel + gaussianNoise(0, baseLevel * noise / 100))));
+    }
+    return { actuals, ...generateForecasts(actuals) };
+  }
+
+  function seasonalDemand() {
+    const baseLevel = randInt(100, 250);
+    const amplitude = randBetween(0.2, 0.5);
+    const period = randInt(25, 35);
+    const phaseShift = randBetween(0, 2 * Math.PI);
+    const noise = randBetween(5, 12);
+    const actuals = [];
+    for (let d = 0; d < NUM_DAYS; d++) {
+      const seasonal = baseLevel * amplitude * Math.sin((2 * Math.PI * d / period) + phaseShift);
+      actuals.push(Math.max(1, Math.round(baseLevel + seasonal + gaussianNoise(0, baseLevel * noise / 100))));
+    }
+    return { actuals, ...generateForecasts(actuals) };
+  }
+
+  function promoSpikeDemand() {
+    const baseLevel = randInt(80, 180);
+    const noise = randBetween(5, 10);
+    const numPromos = randInt(1, 3);
+    const promos = [];
+    for (let p = 0; p < numPromos; p++) {
+      promos.push({ start: randInt(10, NUM_DAYS - 20), duration: randInt(3, 7), multiplier: randBetween(1.8, 3.5) });
+    }
+    const actuals = [];
+    for (let d = 0; d < NUM_DAYS; d++) {
+      let mult = 1;
+      for (const promo of promos) {
+        if (d >= promo.start && d < promo.start + promo.duration) mult = Math.max(mult, promo.multiplier);
+      }
+      actuals.push(Math.max(1, Math.round(baseLevel * mult + gaussianNoise(0, baseLevel * noise / 100))));
+    }
+    return { actuals, promos, ...generateForecasts(actuals, promos) };
+  }
+
+  function newProductLaunch() {
+    const peakLevel = randInt(150, 400);
+    const rampDays = randInt(15, 30);
+    const noise = randBetween(8, 18);
+    const actuals = [];
+    for (let d = 0; d < NUM_DAYS; d++) {
+      const rampFraction = 1 / (1 + Math.exp(-0.3 * (d - rampDays)));
+      actuals.push(Math.max(0, Math.round(peakLevel * rampFraction + gaussianNoise(0, peakLevel * noise / 100 * rampFraction))));
+    }
+    return { actuals, ...generateForecasts(actuals) };
+  }
+
+  function generateForecasts(actuals, promos) {
+    promos = promos || [];
+    const forecasts = {};
+    for (const h of HORIZONS) {
+      forecasts[h] = [];
+      const biasDrift = gaussianNoise(0, 0.02 * Math.sqrt(h / 7));
+      const noiseScale = 0.03 + 0.025 * (h / 7);
+      for (let d = 0; d < NUM_DAYS; d++) {
+        const lookbackEnd = Math.max(0, d - h);
+        let recentAvg = 0, count = 0;
+        for (let lb = Math.max(0, lookbackEnd - 14); lb <= lookbackEnd; lb++) { recentAvg += actuals[lb]; count++; }
+        recentAvg = count > 0 ? recentAvg / count : actuals[0];
+        const errorMagnitude = recentAvg * noiseScale;
+        let forecastVal = recentAvg * (1 + biasDrift) + gaussianNoise(0, errorMagnitude);
+        for (const promo of promos) {
+          if (d >= promo.start && d < promo.start + promo.duration) {
+            if (Math.random() >= Math.max(0, 1 - h / 42)) {
+              forecastVal -= actuals[d] * (promo.multiplier - 1) * randBetween(0.4, 0.8);
+            }
+          }
+        }
+        forecasts[h].push(Math.max(1, Math.round(forecastVal)));
+      }
+    }
+    const mapex = {};
+    for (const h of HORIZONS) {
+      let totalAbsError = 0, totalActuals = 0;
+      for (let v = 0; v <= NUM_DAYS - h; v++) {
+        for (let d = v; d < v + h; d++) {
+          totalAbsError += Math.abs(forecasts[h][d] - actuals[d]);
+          totalActuals += actuals[d];
+        }
+      }
+      mapex[h] = totalActuals > 0 ? (totalAbsError / totalActuals) * 100 : null;
+    }
+    return { forecasts, horizons: HORIZONS, mapex, numDays: NUM_DAYS };
+  }
+
+  const scenarios = { stable: stableDemand, seasonal: seasonalDemand, promo: promoSpikeDemand, newProduct: newProductLaunch };
+  function generate(scenarioKey) { const gen = scenarios[scenarioKey || 'stable'] || scenarios.stable; return gen(); }
+  function getScenarioNames() { return Object.keys(scenarios); }
+  return { generate, getScenarioNames, HORIZONS, NUM_DAYS };
+})();
+</script>
+
 <!-- ══════════════ SCRIPTS ══════════════ -->
 <script>
 (function () {
   "use strict";
 
-  const accent = "#6d28d9";
-  const orange = "#ea580c";
-  const teal = "#0d9488";
-  const red = "#dc2626";
-  const green = "#16a34a";
-  const blue = "#2563eb";
-  const textMuted = "#57534e";
-  const border = "#e7e5e4";
-  const ghost = "#d4d4d4";
+  const accent = "#003DA5";
+  const orange = "#CC0000";
+  const teal = "#007B5F";
+  const red = "#CC0000";
+  const green = "#007B5F";
+  const blue = "#0068B4";
+  const textMuted = "#4A5C7A";
+  const border = "#D0D8E8";
+  const ghost = "#C8D2E4";
 
   // Day-based horizons
   const HORIZONS = [7, 14, 21, 28, 35];
@@ -1266,8 +1493,8 @@
      1) Interactive MAPE Calculator Table
         Actuals are editable, Forecasts are constant
      ═══════════════════════════════════════ */
-  const calcActuals = [100, 120, 90, 110, 105];
-  const calcForecasts = [95, 130, 85, 100, 115]; // constant
+  let calcActuals = [100, 120, 90, 110, 105];
+  let calcForecasts = [95, 130, 85, 100, 115]; // updated by generator
 
   function updateMapeDisplay() {
     let sumPctErr = 0;
@@ -1434,7 +1661,7 @@
       .curve(d3.curveMonotoneX);
 
     g.append("path").datum(actuals).attr("d", area)
-      .attr("fill", "rgba(234,88,12,0.12)").attr("stroke", "none");
+      .attr("fill", "rgba(204,0,0,0.12)").attr("stroke", "none");
 
     const lineGen = d3.line().x((d, i) => x(tsDates[i])).y(d => y(d)).curve(d3.curveMonotoneX);
 
@@ -1805,7 +2032,7 @@
       .attr("y", 0)
       .attr("width", xd(bucketEnd) - xd(bucketStart))
       .attr("height", ih)
-      .attr("fill", "rgba(109,40,217,0.08)")
+      .attr("fill", "rgba(0,61,165,0.08)")
       .attr("stroke", accent)
       .attr("stroke-width", 1.5)
       .attr("stroke-dasharray", "4 3");
@@ -2646,6 +2873,91 @@
     observer.observe(el);
   });
 
+  /* ═══════════════════════════════════════
+     10) Demand Generator — exposed update API
+     ═══════════════════════════════════════ */
+  window.updateMAPETable = function(newActuals, newForecasts) {
+    // Replace in-place so closure bindings stay valid
+    calcActuals = newActuals.slice(0, 5);
+    calcForecasts = newForecasts.slice(0, 5);
+    renderCalcTable();
+  };
+
+  window.updateActualVsForecastChart = function(newActuals) {
+    actuals.length = 0;
+    newActuals.forEach(function(a) { actuals.push(a); });
+    renderTSChart();
+  };
+
+  window.updateMAPExChart = function() {
+    previousMapexData = null;
+    renderMAPExChart();
+  };
+
+  window.updateDailyVersionsViz = function() {
+    renderDailyVersionsChart();
+  };
+
+  window.updateBiasChart = function() {
+    renderBiasChart(FIXED_NOISE, FIXED_TREND, currentScenario);
+  };
+
+  window.updateHeatmap = function() {
+    renderWeeklyHeatmap();
+  };
+
+})();
+</script>
+
+<!-- ══════════════ DEMAND GENERATOR WIRING ══════════════ -->
+<script>
+(function() {
+  function fireRandomize() {
+    var scenario = document.getElementById('scenario-select').value;
+    var data = DemandGenerator.generate(scenario);
+
+    // 1. MAPE calculator table
+    if (typeof window.updateMAPETable === 'function') {
+      window.updateMAPETable(data.actuals.slice(0, 5), data.forecasts[7].slice(0, 5));
+    }
+    // 2. Actual vs Forecast line chart
+    if (typeof window.updateActualVsForecastChart === 'function') {
+      window.updateActualVsForecastChart(data.actuals.slice(0, 30));
+    }
+    // 3. MAPEx scenario chart
+    if (typeof window.updateMAPExChart === 'function') {
+      window.updateMAPExChart();
+    }
+    // 4. Daily versions visualization
+    if (typeof window.updateDailyVersionsViz === 'function') {
+      window.updateDailyVersionsViz();
+    }
+    // 5. Bias chart
+    if (typeof window.updateBiasChart === 'function') {
+      window.updateBiasChart();
+    }
+    // 6. Weekly heatmap
+    if (typeof window.updateHeatmap === 'function') {
+      window.updateHeatmap();
+    }
+
+    // Seed display
+    var seedEl = document.getElementById('seed-display');
+    if (seedEl) seedEl.textContent = '#' + Math.floor(Math.random() * 9000 + 1000);
+
+    // Flash button confirmation
+    var btn = document.getElementById('randomize-btn');
+    if (btn) {
+      btn.textContent = '✓ Done';
+      setTimeout(function() { btn.textContent = 'Randomize ↻'; }, 800);
+    }
+  }
+
+  var btn = document.getElementById('randomize-btn');
+  if (btn) btn.addEventListener('click', fireRandomize);
+
+  var sel = document.getElementById('scenario-select');
+  if (sel) sel.addEventListener('change', fireRandomize);
 })();
 </script>
 </body>
