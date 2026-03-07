@@ -8,30 +8,51 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #F5F7FA;
-      --text: #1B2A4A;
-      --text-muted: #4A5C7A;
-      --accent: #003DA5;
-      --accent-light: #E6EBF7;
-      --accent-mid: #4D79C0;
-      --orange: #CC0000;
-      --orange-light: #FDEAEA;
-      --teal: #007B5F;
-      --teal-light: #E6F2EF;
-      --red: #CC0000;
-      --blue: #0068B4;
-      --green: #007B5F;
-      --border: #D0D8E8;
-      --card-bg: #ffffff;
-      --code-bg: #EEF2F9;
-      --serif: 'Source Serif 4', Georgia, serif;
-      --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+      /* P&G Primary Palette */
+      --pg-blue:     #003DA5; /* PMS 293 C — primary corporate blue */
+      --pg-sky:      #00A3E0; /* PMS 299 C — bright secondary blue  */
+      --pg-yellow:   #FEDB00; /* PMS 108 C — optimism & energy      */
+      --pg-white:    #FFFFFF;
+
+      /* P&G Secondary Palette */
+      --pg-red:      #EF3340; /* PMS 032 C */
+      --pg-orange:   #E87722; /* PMS 158 C */
+      --pg-amber:    #F1B434; /* PMS 143 C */
+      --pg-green:    #00B140; /* PMS 354 C */
+      --pg-lime:     #97D700; /* PMS 375 C */
+      --pg-purple:   #AF1685; /* PMS 241 C */
+      --pg-pink:     #F277C6; /* PMS 231 C */
+      --pg-lightblue:#9ADBE8; /* PMS 304 C */
+      --pg-navy:     #012169; /* PMS 280 C */
+      --pg-black:    #000000;
+
+      /* Semantic tokens → P&G palette */
+      --bg:           #F4F7FB;          /* near-white with blue tint  */
+      --text:         #012169;          /* PMS 280 navy for body text */
+      --text-muted:   #3A5080;          /* muted navy                 */
+      --accent:       #003DA5;          /* PMS 293 primary blue       */
+      --accent-light: #E0EEFA;          /* tint of PMS 293            */
+      --accent-mid:   #00A3E0;          /* PMS 299 sky blue           */
+      --orange:       #E87722;          /* PMS 158 orange → Forecast  */
+      --orange-light: #FEF0E3;          /* tint of PMS 158            */
+      --teal:         #00B140;          /* PMS 354 green → Actuals    */
+      --teal-light:   #E0F5E9;          /* tint of PMS 354            */
+      --red:          #EF3340;          /* PMS 032 — kept for %       */
+      --blue:         #00A3E0;          /* PMS 299                    */
+      --green:        #00B140;          /* PMS 354 — kept for %       */
+      --yellow:       #FEDB00;          /* PMS 108                    */
+      --border:       #C8D8F0;          /* light blue-grey border     */
+      --card-bg:      #FFFFFF;
+      --code-bg:      #EAF1FB;          /* pale blue code background  */
+      --serif: 'Montserrat', system-ui, sans-serif;
+      --sans:  'Montserrat', system-ui, sans-serif;
       --mono: 'Fira Code', 'SF Mono', monospace;
       --max-w: 740px;
       --wide-max-w: 960px;
@@ -51,70 +72,80 @@
     .hero {
       text-align: center;
       padding: 5rem 2rem 4rem;
-      background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
-      border-bottom: 1px solid var(--border);
+      background: linear-gradient(160deg, #003DA5 0%, #00A3E0 60%, #E0EEFA 100%);
+      border-bottom: 3px solid var(--pg-yellow);
     }
+
+    .hero h1 { color: #fff; }
+    .hero h1 span { color: var(--pg-yellow); }
+    .hero p { color: rgba(255,255,255,0.88); }
 
     .hero-badge {
       display: inline-block;
       background: var(--accent);
       color: #fff;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      padding: 0.3em 1em;
+      letter-spacing: 0.14em;
+      padding: 0.35em 1.1em;
       border-radius: 100px;
       margin-bottom: 1.5rem;
+      font-family: var(--sans);
     }
 
     .hero h1 {
-      font-family: var(--serif);
+      font-family: var(--sans);
       font-size: clamp(2.4rem, 6vw, 3.6rem);
-      font-weight: 700;
-      line-height: 1.15;
-      color: var(--text);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      color: #fff;
       max-width: 800px;
       margin: 0 auto 1rem;
     }
 
-    .hero h1 span { color: var(--accent); }
+    .hero h1 span { color: var(--pg-yellow); }
 
     .hero p {
-      font-size: 1.15rem;
-      color: var(--text-muted);
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.88);
       max-width: 560px;
       margin: 0 auto;
-      line-height: 1.6;
+      line-height: 1.65;
+      font-weight: 400;
     }
 
     /* ── Article body ── */
     .article { max-width: var(--max-w); margin: 0 auto; padding: 3rem 1.5rem 5rem; }
 
     .article h2 {
-      font-family: var(--serif);
-      font-size: 1.8rem;
-      font-weight: 700;
+      font-family: var(--sans);
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 3.5rem 0 1rem;
-      color: var(--text);
+      color: var(--pg-blue);
     }
 
     .article h3 {
-      font-family: var(--serif);
-      font-size: 1.3rem;
-      font-weight: 600;
+      font-family: var(--sans);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       margin: 2.5rem 0 0.75rem;
+      color: var(--pg-navy);
     }
 
     .article p { margin-bottom: 1.25rem; color: var(--text); }
     .article p.muted { color: var(--text-muted); font-size: 0.95rem; }
 
-    .article a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-    .article a:hover { color: var(--orange); }
+    .article a { color: var(--pg-sky); text-decoration: underline; text-underline-offset: 2px; }
+    .article a:hover { color: var(--pg-blue); }
 
-    .highlight { color: var(--accent); font-weight: 600; }
-    .highlight-orange { color: var(--orange); font-weight: 600; }
-    .highlight-teal { color: var(--teal); font-weight: 600; }
+    .highlight { color: var(--pg-blue); font-weight: 700; }
+    .highlight-orange { color: var(--pg-orange); font-weight: 700; }
+    .highlight-teal { color: var(--pg-green); font-weight: 700; }
 
     /* ── Formula card ── */
     .formula-card {
@@ -134,9 +165,9 @@
       color: var(--text);
     }
 
-    .formula .f-var { color: var(--accent); font-weight: 500; }
-    .formula .f-actual { color: var(--teal); font-weight: 500; }
-    .formula .f-pred { color: var(--orange); font-weight: 500; }
+    .formula .f-var { color: var(--pg-blue); font-weight: 600; }
+    .formula .f-actual { color: var(--pg-green); font-weight: 600; }
+    .formula .f-pred { color: var(--pg-orange); font-weight: 600; }
     .formula .f-op { color: var(--text-muted); }
 
     .formula-card .formula-label {
@@ -158,20 +189,21 @@
     .vis-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
+      border-top: 3px solid var(--pg-blue);
       border-radius: 12px;
       padding: 1.5rem 1.5rem 1rem;
       margin: 2rem 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.07);
       overflow: hidden;
     }
 
     .vis-card h4 {
       font-family: var(--sans);
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      color: var(--accent);
       margin-bottom: 1rem;
     }
 
@@ -200,10 +232,10 @@
     }
 
     .control-group .value-display {
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--accent);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--pg-blue);
       min-width: 3ch;
     }
 
@@ -222,36 +254,36 @@
       appearance: none;
       width: 18px; height: 18px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--pg-blue);
       cursor: pointer;
       border: 2px solid #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
 
     input[type="range"]::-webkit-slider-thumb:active {
       transform: scale(1.25);
-      box-shadow: 0 2px 8px rgba(0,61,165,0.35);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.4);
     }
 
     input[type="range"]::-moz-range-thumb {
       width: 18px; height: 18px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--pg-blue);
       cursor: pointer;
       border: 2px solid #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
 
     input[type="range"]::-moz-range-thumb:active {
       transform: scale(1.25);
-      box-shadow: 0 2px 8px rgba(0,61,165,0.35);
+      box-shadow: 0 2px 8px rgba(0,61,165,0.4);
     }
 
     /* ── Callout boxes ── */
     .callout {
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid var(--pg-sky);
       background: var(--accent-light);
       padding: 1rem 1.25rem;
       border-radius: 0 8px 8px 0;
@@ -260,12 +292,12 @@
     }
 
     .callout.callout-orange {
-      border-left-color: var(--orange);
+      border-left-color: var(--pg-orange);
       background: var(--orange-light);
     }
 
     .callout.callout-teal {
-      border-left-color: var(--teal);
+      border-left-color: var(--pg-green);
       background: var(--teal-light);
     }
 
@@ -289,8 +321,8 @@
     }
 
     .step-card:hover {
-      border-color: var(--accent-mid);
-      box-shadow: 0 2px 8px rgba(0,61,165,0.08);
+      border-color: var(--pg-sky);
+      box-shadow: 0 2px 8px rgba(0,163,224,0.12);
     }
 
     .step-card .step-num {
@@ -299,11 +331,12 @@
       justify-content: center;
       width: 2rem; height: 2rem;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--pg-blue);
       color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 0.75rem;
+      font-weight: 800;
       margin-bottom: 0.5rem;
+      font-family: var(--sans);
     }
 
     .step-card h5 {
@@ -354,14 +387,16 @@
 
     .mape-result {
       text-align: center;
-      font-family: var(--mono);
-      font-size: 1.4rem;
+      font-family: var(--sans);
+      font-size: 1.3rem;
       font-weight: 700;
-      color: var(--accent);
+      letter-spacing: -0.01em;
+      color: var(--pg-blue);
       padding: 0.75rem;
       background: var(--accent-light);
       border-radius: 8px;
       margin: 1rem 0;
+      border: 1px solid var(--border);
     }
 
     /* ── Horizon bar chart colors ── */
@@ -433,8 +468,8 @@
       font-size: 0.82rem;
     }
 
-    .footer a { color: var(--accent); text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
+    .footer a { color: var(--pg-sky); text-decoration: none; }
+    .footer a:hover { color: var(--pg-blue); text-decoration: underline; }
 
     /* ── Impact table ── */
     .impact-table {
@@ -468,20 +503,20 @@
 
     .impact-table td.current-month {
       background: var(--teal-light);
-      color: var(--teal);
-      font-weight: 600;
+      color: var(--pg-green);
+      font-weight: 700;
     }
 
     .impact-table td.next-month {
       background: var(--orange-light);
-      color: var(--orange);
-      font-weight: 600;
+      color: var(--pg-orange);
+      font-weight: 700;
     }
 
     .impact-table td.both-months {
       background: linear-gradient(135deg, var(--teal-light) 50%, var(--orange-light) 50%);
-      color: var(--text);
-      font-weight: 600;
+      color: var(--pg-navy);
+      font-weight: 700;
     }
 
     /* ── Scenario toggle buttons ── */
@@ -505,24 +540,24 @@
       transition: all 0.2s;
     }
 
-    .scenario-btn:hover { border-color: var(--accent-mid); color: var(--accent); }
-    .scenario-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .scenario-btn:hover { border-color: var(--pg-sky); color: var(--pg-blue); }
+    .scenario-btn.active { background: var(--pg-blue); color: #fff; border-color: var(--pg-blue); }
 
     /* ── Play button ── */
     .play-btn {
       font-family: var(--sans);
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
       padding: 0.4em 1.2em;
       border-radius: 100px;
-      border: 1.5px solid var(--accent);
+      border: 1.5px solid var(--pg-blue);
       background: var(--accent-light);
-      color: var(--accent);
+      color: var(--pg-blue);
       cursor: pointer;
       transition: all 0.2s;
     }
-    .play-btn:hover { background: var(--accent); color: #fff; }
-    .play-btn.playing { background: var(--orange); color: #fff; border-color: var(--orange); }
+    .play-btn:hover { background: var(--pg-blue); color: #fff; }
+    .play-btn.playing { background: var(--pg-orange); color: #fff; border-color: var(--pg-orange); }
 
     /* ── Business impact card ── */
     .impact-result-card {
@@ -541,10 +576,10 @@
     }
 
     .impact-metric .metric-value {
-      font-family: var(--mono);
+      font-family: var(--sans);
       font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--accent);
+      font-weight: 800;
+      color: var(--pg-blue);
     }
 
     .impact-metric .metric-label {
@@ -597,7 +632,7 @@
       gap: 1rem;
       padding: 1.25rem;
       background: var(--accent-light);
-      border: 1px solid var(--accent-mid);
+      border: 1.5px solid var(--pg-sky);
       border-radius: 10px;
       margin: 1rem 0;
     }
@@ -613,7 +648,38 @@
     }
 
     .reforecast-recommendation .rec-text strong {
-      color: var(--accent);
+      color: var(--pg-blue);
+    }
+
+    /* ── Details/Summary (DP Challenge) ── */
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary { margin-bottom: 0.25rem; }
+
+    /* ── Phase badge ── */
+    .hero-badge { cursor: default; }
+
+    /* ── Mobile: Heatmap horizontal scroll ── */
+    .vis-card .weekly-heatmap-table {
+      min-width: 500px;
+    }
+    .vis-card:has(.weekly-heatmap-table),
+    .vis-card:has(.impact-table) {
+      overflow-x: auto;
+    }
+
+    /* Swipe indicator for mobile tables */
+    @media (max-width: 640px) {
+      .vis-card:has(.weekly-heatmap-table)::before,
+      .vis-card:has(.impact-table)::before {
+        content: "← Swipe to see more →";
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        font-style: italic;
+      }
     }
 
     /* ── Responsive ── */
@@ -627,6 +693,7 @@
       .scenario-btns { gap: 0.35rem; }
       .scenario-btn { font-size: 0.68rem; padding: 0.35em 0.8em; }
       .impact-result-card { grid-template-columns: 1fr 1fr; }
+      .impact-table { min-width: 480px; }
     }
   </style>
 </head>
@@ -640,6 +707,9 @@
 
 <!-- ══════════════ ARTICLE ══════════════ -->
 <main class="article">
+
+  <!-- ── Phase 1 Badge ── -->
+  <div class="hero-badge" style="display:inline-block;margin-bottom:1rem;background:var(--teal);">Phase 1: What is a Forecast?</div>
 
   <!-- ── Section 1: What is Forecasting? ── -->
   <h2>Why Measuring Forecast Error Matters</h2>
@@ -699,11 +769,19 @@
   <h2>See MAPE in Action</h2>
   <p>
     The table below shows a simple example. <strong>Drag the sliders</strong> to change the
-    actual values and watch MAPE update in real time. The forecasts are held constant.
+    actual values and watch MAPE update in real time. Toggle between Simple MAPE and
+    Volume-Weighted MAPEx to see how they differ when volumes vary across periods.
   </p>
 
   <div class="vis-card">
-    <h4>Interactive MAPE Calculator</h4>
+    <h4>Interactive MAPE / MAPEx Calculator</h4>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="scenario-btn active" id="mode-simple-mape" onclick="setCalcMode('simple')">Simple MAPE</button>
+      <button class="scenario-btn" id="mode-volume-mapex" onclick="setCalcMode('volume')">Volume-Weighted MAPEx</button>
+    </div>
+    <div id="calc-mode-desc" class="callout callout-teal" style="font-size:0.85rem;margin-bottom:0.75rem;">
+      <strong>Simple MAPE:</strong> Each period contributes equally — a 50-unit error on 100 actuals (50%) is weighted the same as a 50-unit error on 1000 actuals (5%). Low-volume periods can dominate the average.
+    </div>
     <div id="calc-container">
       <table class="calc-table">
         <thead>
@@ -711,23 +789,31 @@
             <th>Period</th>
             <th>Actual (Aₜ) — drag to edit</th>
             <th>Forecast (Fₜ)</th>
-            <th>|Aₜ − Fₜ| / |Aₜ|</th>
+            <th id="calc-col-header">|Aₜ − Fₜ| / |Aₜ|</th>
           </tr>
         </thead>
         <tbody id="calc-body"></tbody>
       </table>
       <div id="mape-result" class="mape-result"></div>
+      <div id="mapex-comparison" style="display:none;margin-top:0.5rem;padding:0.75rem;background:var(--accent-light);border-radius:8px;font-size:0.85rem;">
+        <strong>Why they differ:</strong> Volume-Weighted MAPEx = Σ|errors| / Σactuals = <span id="mapex-num"></span> / <span id="mapex-den"></span> = <span id="mapex-ratio"></span>%<br>
+        <em>High-volume periods pull the result toward their error rate; low-volume outliers are naturally down-weighted.</em>
+      </div>
     </div>
   </div>
 
   <div class="callout callout-teal">
-    <strong>Larger denominators shrink MAPE:</strong> When actuals increase but absolute errors
-    stay constant, percentage error falls (e.g., 10/100 = 10% vs. 10/200 = 5%). This is a
-    property of the metric, not a sign of improved forecasting. Be cautious when comparing
-    MAPE across products or periods with very different volume levels.
+    <strong>MAPE Sensitivity to Volume:</strong> High-volume periods can mathematically mask
+    absolute errors due to a larger denominator — when actuals double but the absolute miss stays
+    the same, MAPE halves (e.g., |error|/100 = 10% vs. |error|/200 = 5%). This is a structural
+    property of the metric, not a sign of improved forecasting accuracy. Exercise caution when
+    comparing MAPE or MAPEx across products or time periods with significantly different volume levels.
   </div>
 
   <hr class="divider">
+
+  <!-- ── Phase 2 Badge ── -->
+  <div class="hero-badge" style="display:inline-block;margin-top:2rem;margin-bottom:1rem;background:var(--accent);">Phase 2: The Anatomy of a Version</div>
 
   <!-- ── Section 4: Understanding Horizon and Time Bucket ── -->
   <h2>Understanding Horizon and Time Bucket</h2>
@@ -788,7 +874,7 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
       <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(204,0,0,0.15)"></div> Error region</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(232,119,34,0.2)"></div> Error region</div>
     </div>
     <div id="ts-chart"></div>
     <div id="ts-mape" class="mape-result" style="margin-top:0.75rem;"></div>
@@ -796,11 +882,17 @@
 
   <hr class="divider">
 
+  <!-- ── Phase 4 Badge ── -->
+  <div class="hero-badge" style="display:inline-block;margin-top:2rem;margin-bottom:1rem;background:#7c3aed;">Phase 4: Real World Scenarios</div>
+
   <!-- ── Section 6: MAPE vs Horizon ── -->
-  <h2>MAPEx: Error Grows with Horizon</h2>
+  <h2>MAPEx Across Horizons: The Full Picture</h2>
   <p>
-    Now let's plot the MAPE <em>itself</em> for each horizon. This is the MAPEx curve — it shows
-    how forecast quality degrades as we predict further into the future.
+    Now let's plot MAPEx <em>itself</em> at each horizon. While error <em>typically</em> grows
+    with horizon for most demand patterns, this is not a universal rule.
+    For some regional SKUs or highly seasonal products, H=28 or H=35 can actually show
+    <em>lower</em> MAPEx than H=7 — because longer-horizon models may exploit seasonal structure
+    that short-horizon models miss. The curve depends entirely on your demand pattern and model.
   </p>
 
   <div class="vis-card">
@@ -820,14 +912,19 @@
     <div id="mapex-chart"></div>
   </div>
 
-  <p class="muted" style="text-align:center;margin-top:0.5rem;">In this demo, we simulate a recursive model: each step uses the previous forecast as input, so errors accumulate.</p>
+  <p class="muted" style="text-align:center;margin-top:0.5rem;">In this demo, we simulate a recursive model for most scenarios. Try <strong>Seasonal</strong> — notice how some horizons can outperform shorter ones by leveraging periodic structure.</p>
 
-  <p>
-    Notice the characteristic upward shape: short horizons produce small errors, while
-    longer horizons produce progressively larger errors.
-  </p>
+  <div class="callout callout-teal">
+    <strong>Real-World Insight:</strong> In regional supply chains, a product with strong weekly seasonality
+    may have lower MAPEx at H=28 than at H=7, because the H=28 model aligns with the same day-of-week
+    across 4 full weeks, averaging out noise. Short-horizon models sometimes amplify week-specific
+    spikes. <em>Always examine your MAPEx curve empirically — don't assume monotone growth.</em>
+  </div>
 
   <hr class="divider">
+
+  <!-- ── Phase 3 Badge ── -->
+  <div class="hero-badge" style="display:inline-block;margin-top:2rem;margin-bottom:1rem;background:var(--orange);">Phase 3: The Aggregation Secret</div>
 
   <!-- ── Daily Versions Section ── -->
   <h2>The MAPEx Formula &mdash; Daily Versions</h2>
@@ -896,6 +993,37 @@
   <p id="dv-aggregate-text">
   </p>
 
+  <div class="callout callout-orange" style="margin-top:1rem;">
+    <strong>Critical Rule: Monthly MAPEx is NOT the average of daily percentages.</strong><br>
+    Monthly MAPEx must be computed as:
+    <br><br>
+    <code style="font-family:var(--mono);font-size:0.9rem;">Monthly MAPEx = Σ TAE (across all ~22 business-day versions) / Σ Actuals (across all ~22 versions)</code>
+    <br><br>
+    Averaging daily percentages instead gives incorrect results because each day's percentage
+    is influenced by its own actuals volume. A high-volume day with 5% error and a
+    low-volume day with 50% error should NOT contribute equally — the volume-weighted
+    sum correctly handles this. With ~22 working versions per month (excluding weekends),
+    the formula is:
+    <br><br>
+    <code style="font-family:var(--mono);font-size:0.9rem;">Monthly MAPEx = (TAE_v1 + TAE_v2 + ... + TAE_v22) / (A_v1 + A_v2 + ... + A_v22)</code>
+  </div>
+
+  <!-- ── Monthly Aggregation Flow ── -->
+  <div class="vis-card" style="margin-bottom:2rem;">
+    <h4>Monthly Aggregation Flow — How 22 Daily Versions Become One Monthly MAPEx</h4>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+      Each business day generates a new forecast version. For a monthly MAPEx, we collect
+      all ~22 versions (excluding weekends), sum their TAE and Actuals, then divide once.
+      We do <strong>NOT</strong> average the daily percentages.
+    </p>
+    <div id="monthly-flow-chart"></div>
+    <div class="callout callout-orange" style="margin-top:1rem;font-size:0.82rem;">
+      <strong>Wrong approach (simple average):</strong> (MAPEx_v1 + MAPEx_v2 + ... + MAPEx_v22) / 22<br>
+      <strong>Correct MAPEx approach:</strong> (TAE_v1 + TAE_v2 + ... + TAE_v22) / (A_v1 + A_v2 + ... + A_v22)<br>
+      The difference can be significant when daily volumes vary (e.g., weekend spikes or promotions).
+    </div>
+  </div>
+
   <div class="vis-card">
     <h4>Daily Versions Visualized &mdash; Rolling Windows</h4>
     <div class="controls">
@@ -932,9 +1060,16 @@
   <!-- ── Forecast Revision Impact Grid ── -->
   <h2>Forecast Revision Impact Across Horizons</h2>
   <p>
-    When you edit a forecast in a specific week, it affects different horizon/month
-    combinations. The table below shows which months are impacted for each horizon.
+    When you edit a forecast in a specific week of the Beginning of Period (BOP),
+    it affects different horizon/month combinations. The table below shows which
+    months are impacted for each horizon when you revise during each week.
   </p>
+
+  <div class="callout callout-teal" style="margin-bottom:1rem;">
+    <strong>Key Rule:</strong> At H=28, a Week 1 BOP edit impacts <em>both</em> the current
+    month (M) and the next month (M+1), because the 28-day window spans across the month boundary.
+    At H=35, Week 1 edits reach M+1 and M+2. Hover over column headers for pro-tips.
+  </div>
 
   <div class="vis-card">
     <h4>Forecast Edit Impact Matrix</h4>
@@ -942,11 +1077,11 @@
       <thead>
         <tr>
           <th>Editing Week</th>
-          <th>H=7 Days</th>
-          <th>H=14 Days</th>
-          <th>H=21 Days</th>
-          <th>H=28 Days</th>
-          <th>H=35 Days</th>
+          <th title="H=7: Only affects current week — impacts current month M only.">H=7 Days ℹ️</th>
+          <th title="H=14: Two-week window. Week 1 stays in M; by Week 4 you start bleeding into M+1.">H=14 Days ℹ️</th>
+          <th title="H=21: Three-week window. By Week 3 you're solidly in M+1.">H=21 Days ℹ️</th>
+          <th title="💡 Pro-Tip: W1 and W2 of BOP are critical for H=28 — your edits affect TWO months!">H=28 Days 💡</th>
+          <th title="💡 Pro-Tip: H=35 always looks 5 weeks ahead. Even W1 edits can impact M+2!">H=35 Days 💡</th>
         </tr>
       </thead>
       <tbody id="impact-body"></tbody>
@@ -955,6 +1090,20 @@
       Click on a cell to see which months are affected by editing that week's forecast.
     </p>
     <div id="impact-result" class="mape-result" style="display:none;"></div>
+  </div>
+
+  <!-- DP Challenge 1 -->
+  <div class="callout" style="background:linear-gradient(135deg,var(--accent-light),#fff);border-left-color:var(--accent);margin-top:1.5rem;">
+    <strong>DP Challenge:</strong> You are editing Week 1 BOP forecasts today. Which horizon should
+    you focus on to affect <em>next month's</em> MAPEx without impacting this month?
+    <details style="margin-top:0.5rem;cursor:pointer;">
+      <summary style="font-weight:600;color:var(--accent);">Show Answer</summary>
+      <div style="margin-top:0.5rem;padding:0.5rem;background:#fff;border-radius:6px;font-size:0.9rem;">
+        <strong>H=35!</strong> Week 1 at H=35 impacts M+1 and M+2 (skipping current M entirely).
+        H=28 Week 1 would also affect M+1 but it also bleeds into M.
+        H=7, H=14, H=21 Week 1 edits only affect M.
+      </div>
+    </details>
   </div>
 
   <hr class="divider">
@@ -999,11 +1148,13 @@
   <hr class="divider">
 
   <!-- ── Section 9: Limitations ── -->
-  <h2>Limitations of MAPE</h2>
+  <h2>Limitations of MAPEx</h2>
 
   <div class="callout callout-orange">
     <strong>Division by zero:</strong> If any actual value Aₜ is zero, MAPE is undefined.
-    This makes MAPE unsuitable for intermittent or sparse data.
+    This makes MAPE unsuitable for intermittent or sparse data. MAPEx mitigates this by dividing
+    the sum of errors by the sum of actuals across the entire bucket — a single zero period
+    doesn't blow up the metric, but a bucket of all-zero actuals still causes division by zero.
   </div>
 
   <p>
@@ -1016,11 +1167,61 @@
     <li><strong>Under-forecast:</strong> Actual&nbsp;=&nbsp;150, Forecast&nbsp;=&nbsp;100 &rarr; |150&nbsp;&minus;&nbsp;100|&nbsp;/&nbsp;150 = <strong>33%</strong></li>
   </ul>
   <p>
-    Same absolute error, different MAPE — because the denominator changes. More importantly,
-    over-forecast errors have no upper bound (a forecast of 1000 when actual is 100 = 900%),
-    while under-forecast errors are capped at 100% (forecast of 0 when actual is 100 = 100%).
-    This asymmetry can systematically bias model selection toward under-forecasting.
+    Same absolute error, different MAPE — because the denominator changes. Over-forecast errors
+    have no upper bound, while under-forecast errors are capped at 100%.
   </p>
+
+  <div class="callout callout-orange">
+    <strong>Asymmetric Penalty for Demand Planners (DP View):</strong> In supply chain planning,
+    <em>over-forecasting</em> (planning more than needed) leads to <em>under-shipping</em> — the warehouse
+    ships less than planned because actuals are lower. This results in a <strong>higher percentage
+    error</strong> than if you had under-forecast by the same absolute amount.
+    Concretely: Over-forecast by 50 units when actual = 100 → 50% error.
+    Under-forecast by 50 units when actual = 150 → 33% error.
+    This structural asymmetry means MAPEx implicitly penalizes over-forecasting more harshly —
+    a critical consideration for demand planners calibrating their bias.
+  </div>
+
+  <!-- ── Asymmetric Penalty Simulator ── -->
+  <div class="vis-card" style="margin-top:1.5rem;">
+    <h4>Asymmetric Penalty Simulator</h4>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
+      Set an absolute error, then toggle direction to see how MAPE reacts differently.
+    </p>
+    <div class="controls" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">
+      <div class="control-group">
+        <label>Absolute Error (units)</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <input type="range" id="penalty-error-slider" min="1" max="200" value="50" step="1" style="width:160px;">
+          <span class="value-display" id="penalty-error-value">50 units</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="scenario-btn active" id="penalty-over-btn" onclick="setPenaltyMode('over')">Over-forecast (under-ship)</button>
+        <button class="scenario-btn" id="penalty-under-btn" onclick="setPenaltyMode('under')">Under-forecast (over-ship)</button>
+      </div>
+    </div>
+    <div id="penalty-display" style="margin-top:1rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:var(--orange-light);border:1px solid var(--orange);border-radius:10px;padding:1.25rem;text-align:center;">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);font-weight:700;margin-bottom:0.5rem;">MAPEx Error</div>
+          <div id="penalty-pct" style="font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--orange);">50%</div>
+        </div>
+        <div style="background:var(--accent-light);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-size:0.82rem;line-height:1.6;">
+          <div id="penalty-explanation" style="color:var(--text);">
+            <strong>Over-forecast:</strong> Forecast = 150, Actual = 100<br>
+            Error = |100 − 150| / 100 = <strong>50%</strong><br>
+            <em>Denominator = actual (the lower number)</em>
+          </div>
+        </div>
+      </div>
+      <div id="penalty-scale" style="margin-top:1rem;height:40px;border-radius:8px;overflow:hidden;display:flex;">
+        <div id="penalty-fill" style="background:var(--orange);transition:width 0.4s ease;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;"></div>
+        <div id="penalty-rest" style="background:var(--teal-light);height:100%;flex:1;"></div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">Visual: error share of actual demand</div>
+    </div>
+  </div>
 
   <p>
     <strong>Scale sensitivity at low volumes:</strong> If actual demand is 2 units and you forecast 1,
@@ -1029,10 +1230,28 @@
 
   <div class="callout callout-orange">
     <strong>Volume weighting across SKUs:</strong> When computing MAPEx across multiple SKUs
-    (products), high-volume items dominate the aggregate MAPE since their absolute errors are
+    (products), high-volume items dominate the aggregate MAPEx since their absolute errors are
     larger. A single best-selling SKU can skew the overall MAPEx curve, masking poor performance
-    on low-volume items. Consider computing MAPE per-SKU first, then averaging, or use WMAPE
-    to explicitly weight by volume.
+    on low-volume items. This is by design — MAPEx correctly reflects <em>business</em> impact,
+    where a 5% error on a 10,000-unit product matters more than a 50% error on a 10-unit niche item.
+    But if you want equal weight per SKU, compute MAPEx per-SKU first, then average.
+  </div>
+
+  <!-- DP Challenge 2 -->
+  <div class="callout" style="background:linear-gradient(135deg,var(--accent-light),#fff);border-left-color:var(--accent);margin-top:1.5rem;">
+    <strong>DP Challenge:</strong> Your team is choosing between two forecast strategies.
+    Strategy A: consistently over-forecasts by 50 units. Strategy B: consistently under-forecasts
+    by 50 units. Assuming actuals = 100 units, which strategy has a lower MAPEx?
+    <details style="margin-top:0.5rem;cursor:pointer;">
+      <summary style="font-weight:600;color:var(--accent);">Show Answer</summary>
+      <div style="margin-top:0.5rem;padding:0.5rem;background:#fff;border-radius:6px;font-size:0.9rem;">
+        <strong>Strategy B (under-forecast) has lower MAPEx!</strong><br>
+        Over-forecast: |100−150|/100 = 50% | Under-forecast: |150−100|/150 = 33%<br>
+        Same absolute error, but the denominator changes. For demand planners:
+        under-shipping (over-forecast) is penalized more heavily by MAPEx than over-shipping
+        (under-forecast) by the same units.
+      </div>
+    </details>
   </div>
 
   <hr class="divider">
@@ -1077,24 +1296,35 @@
   <p>
     When you forecast at horizon <span class="highlight-orange">x</span>, you're predicting
     the value <em>x days from now</em> using only data available <em>today</em>. The gap between
-    the last known data point and the prediction target is the <strong>information lag</strong>.
+    the last known data point and the prediction target is the <strong>information lag</strong>
+    — the "blind spot" the model cannot see.
   </p>
   <p>
-    The visualization below shows this for each horizon. The solid region is known data,
-    the gap is the lag (the blind spot), and the point at the end is what the model must predict.
-    As the horizon grows, the lag grows — and the model has less relevant information to work with.
+    Drag the slider below to visualize how the blind spot physically expands as horizon grows.
   </p>
 
   <div class="vis-card">
-    <h4>Horizon Lag — What the Model "Sees" vs. What It Must Predict</h4>
+    <h4>Horizon Lag Visualizer — Drag to Expand the Blind Spot</h4>
+    <div class="controls">
+      <div class="control-group">
+        <label>Forecast Horizon</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <input type="range" id="lag-slider" min="7" max="35" value="7" step="7" style="width:200px;">
+          <span class="value-display" id="lag-slider-value">H=7</span>
+          <span id="lag-slider-date" style="font-size:0.75rem;color:var(--text-muted);"></span>
+        </div>
+      </div>
+    </div>
     <div id="lag-chart"></div>
+    <div id="lag-insight" class="callout callout-teal" style="margin-top:0.75rem;font-size:0.85rem;"></div>
   </div>
 
   <p>
     At <span class="highlight">day 7</span> (<span id="lag-date-7"></span>), the model predicts just one week out — the lag is
     short and recent patterns are still relevant. By <span class="highlight-orange">day 35</span>
     (<span id="lag-date-35"></span>), the model must bridge a five-week gap, during which demand patterns, seasonality, and external
-    factors can all shift. This is why MAPEx increases with horizon.
+    factors can all shift. Longer horizons aren't always worse — but they require more structural
+    signal and less reliance on recency.
   </p>
 
   <hr class="divider">
@@ -1181,17 +1411,17 @@
   <!-- ── Section 12: Takeaways ── -->
   <h2>Key Takeaways</h2>
   <div class="step-cards">
-    <div class="step-card" style="border-color:var(--accent-mid)">
-      <h5>MAPE is intuitive</h5>
-      <p>A percentage-based error that's easy to communicate and compare across datasets.</p>
+    <div class="step-card" style="border-color:var(--pg-blue);border-top:3px solid var(--pg-yellow);">
+      <h5>MAPEx is intuitive</h5>
+      <p>A volume-weighted percentage-based error that's easy to communicate and compare across datasets.</p>
     </div>
-    <div class="step-card" style="border-color:var(--accent-mid)">
-      <h5>Horizon matters</h5>
-      <p>MAPEx reveals how error grows as you forecast further ahead — essential for setting expectations.</p>
+    <div class="step-card" style="border-color:var(--pg-blue);border-top:3px solid var(--pg-sky);">
+      <h5>Horizon matters — but isn't always monotone</h5>
+      <p>MAPEx reveals forecast quality across horizons. Real-world data can surprise you — examine empirically.</p>
     </div>
-    <div class="step-card" style="border-color:var(--accent-mid)">
+    <div class="step-card" style="border-color:var(--pg-blue);border-top:3px solid var(--pg-orange);">
       <h5>Know the limits</h5>
-      <p>MAPE struggles with zeros, is asymmetric, and is sensitive to small actuals. Pair it with other metrics.</p>
+      <p>MAPEx struggles with zeros, is asymmetric, and penalizes over-forecasting harder. Pair with bias metrics.</p>
     </div>
   </div>
 
@@ -1231,27 +1461,28 @@
   bottom: 24px;
   right: 24px;
   z-index: 9999;
-  background: #0A1F44;
-  border: 1px solid rgba(77,121,192,0.5);
+  background: #012169;
+  border: 1px solid rgba(0,163,224,0.4);
   border-radius: 12px;
   padding: 14px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  font-family: inherit;
-  color: #E6EBF7;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  font-family: 'Montserrat', sans-serif;
+  color: #E0EEFA;
 ">
   <span style="font-size: 13px; font-weight: 700; opacity: 0.9; white-space:nowrap;">&#x1F3B2; Demand</span>
   <select id="scenario-select" style="
-    background: #0D2B5E;
-    color: #E6EBF7;
-    border: 1px solid rgba(77,121,192,0.4);
+    background: #003DA5;
+    color: #fff;
+    border: 1px solid rgba(0,163,224,0.5);
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
-    font-family: inherit;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
   ">
     <option value="stable">Stable</option>
     <option value="seasonal">Seasonal</option>
@@ -1259,17 +1490,18 @@
     <option value="newProduct">New Product</option>
   </select>
   <button id="randomize-btn" style="
-    background: linear-gradient(135deg, #003DA5, #0068B4);
-    color: white;
+    background: linear-gradient(135deg, #FEDB00, #F1B434);
+    color: #012169;
     border: none;
     border-radius: 6px;
     padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.15s;
-    font-family: inherit;
+    font-family: 'Montserrat', sans-serif;
     white-space: nowrap;
+    letter-spacing: 0.03em;
   " onmousedown="this.style.transform='scale(0.95)'"
      onmouseup="this.style.transform='scale(1)'"
   >
@@ -1401,15 +1633,20 @@ const DemandGenerator = (() => {
 (function () {
   "use strict";
 
-  const accent = "#003DA5";
-  const orange = "#CC0000";
-  const teal = "#007B5F";
-  const red = "#CC0000";
-  const green = "#007B5F";
-  const blue = "#0068B4";
-  const textMuted = "#4A5C7A";
-  const border = "#D0D8E8";
-  const ghost = "#C8D2E4";
+  // P&G Brand Palette
+  const accent  = "#003DA5"; // PMS 293 — primary blue (unchanged)
+  const sky     = "#00A3E0"; // PMS 299 — secondary blue
+  const orange  = "#E87722"; // PMS 158 — Forecast line / error
+  const teal    = "#00B140"; // PMS 354 — Actuals line / good
+  const red     = "#EF3340"; // PMS 032 — kept for bad % benchmarks
+  const green   = "#00B140"; // PMS 354 — kept for good % benchmarks
+  const amber   = "#F1B434"; // PMS 143 — accent warm
+  const yellow  = "#FEDB00"; // PMS 108
+  const navy    = "#012169"; // PMS 280 — text
+  const blue    = "#00A3E0"; // PMS 299
+  const textMuted = "#3A5080";
+  const border  = "#C8D8F0";
+  const ghost   = "#B8CCE8";
 
   // Day-based horizons
   const HORIZONS = [7, 14, 21, 28, 35];
@@ -1495,14 +1732,52 @@ const DemandGenerator = (() => {
      ═══════════════════════════════════════ */
   let calcActuals = [100, 120, 90, 110, 105];
   let calcForecasts = [95, 130, 85, 100, 115]; // updated by generator
+  let calcMode = 'simple'; // 'simple' or 'volume'
+
+  window.setCalcMode = function(mode) {
+    calcMode = mode;
+    document.getElementById('mode-simple-mape').classList.toggle('active', mode === 'simple');
+    document.getElementById('mode-volume-mapex').classList.toggle('active', mode === 'volume');
+    const descEl = document.getElementById('calc-mode-desc');
+    const colHeader = document.getElementById('calc-col-header');
+    const compEl = document.getElementById('mapex-comparison');
+    if (mode === 'simple') {
+      descEl.className = 'callout callout-teal';
+      descEl.innerHTML = '<strong>Simple MAPE:</strong> Each period contributes equally — a 50-unit error on 100 actuals (50%) is weighted the same as a 50-unit error on 1000 actuals (5%). Low-volume periods can dominate the average.';
+      colHeader.textContent = '|Aₜ − Fₜ| / |Aₜ|';
+      compEl.style.display = 'none';
+    } else {
+      descEl.className = 'callout callout-orange';
+      descEl.innerHTML = '<strong>Volume-Weighted MAPEx:</strong> Uses Σ|errors| / Σactuals — high-volume periods are weighted proportionally to their size. A 50-unit error on 1000 actuals barely moves the needle; the same error on 10 actuals dominates a Simple MAPE but is correctly down-weighted here.';
+      colHeader.textContent = '|Aₜ − Fₜ| (abs error)';
+      compEl.style.display = 'block';
+    }
+    updateMapeDisplay();
+    renderCalcTable();
+  };
 
   function updateMapeDisplay() {
+    let totalAbsErr = 0;
+    let totalActuals = 0;
     let sumPctErr = 0;
     calcActuals.forEach((a, i) => {
       const f = calcForecasts[i];
-      sumPctErr += a !== 0 ? Math.abs(a - f) / Math.abs(a) : 0;
+      const absErr = Math.abs(a - f);
+      totalAbsErr += absErr;
+      totalActuals += Math.abs(a);
+      sumPctErr += a !== 0 ? absErr / Math.abs(a) : 0;
     });
-    d3.select("#mape-result").text("MAPE = " + ((sumPctErr / calcActuals.length) * 100).toFixed(2) + "%");
+    const simpleMape = (sumPctErr / calcActuals.length) * 100;
+    const volumeMape = totalActuals > 0 ? (totalAbsErr / totalActuals) * 100 : 0;
+
+    if (calcMode === 'simple') {
+      d3.select("#mape-result").text("Simple MAPE = " + simpleMape.toFixed(2) + "%");
+    } else {
+      d3.select("#mape-result").text("Volume-Weighted MAPEx = " + volumeMape.toFixed(2) + "%");
+      d3.select("#mapex-num").text(totalAbsErr.toFixed(1));
+      d3.select("#mapex-den").text(totalActuals.toFixed(1));
+      d3.select("#mapex-ratio").text(volumeMape.toFixed(2));
+    }
   }
 
   function renderCalcTable() {
@@ -1512,6 +1787,7 @@ const DemandGenerator = (() => {
     calcActuals.forEach((a, i) => {
       const f = calcForecasts[i];
       const pctErr = a !== 0 ? Math.abs(a - f) / Math.abs(a) : 0;
+      const absErr = Math.abs(a - f);
 
       const tr = tbody.append("tr");
       tr.append("td").text("t" + (i + 1));
@@ -1534,14 +1810,20 @@ const DemandGenerator = (() => {
       // Forecast column: constant display
       tr.append("td").attr("class", "col-pred").text(f);
 
-      const errorCell = tr.append("td").attr("class", "col-error").text((pctErr * 100).toFixed(1) + "%");
+      const displayVal = calcMode === 'simple'
+        ? (pctErr * 100).toFixed(1) + "%"
+        : absErr.toFixed(1) + " units";
+      const errorCell = tr.append("td").attr("class", "col-error").text(displayVal);
 
       inp.on("input", function () {
         calcActuals[i] = +this.value;
         const newA = calcActuals[i];
-        const newPctErr = newA !== 0 ? Math.abs(newA - f) / Math.abs(newA) : 0;
+        const newAbsErr = Math.abs(newA - f);
+        const newPctErr = newA !== 0 ? newAbsErr / Math.abs(newA) : 0;
         actualSpan.text(Math.round(newA));
-        errorCell.text((newPctErr * 100).toFixed(1) + "%");
+        errorCell.text(calcMode === 'simple'
+          ? (newPctErr * 100).toFixed(1) + "%"
+          : newAbsErr.toFixed(1) + " units");
         updateMapeDisplay();
       });
     });
@@ -1661,7 +1943,7 @@ const DemandGenerator = (() => {
       .curve(d3.curveMonotoneX);
 
     g.append("path").datum(actuals).attr("d", area)
-      .attr("fill", "rgba(204,0,0,0.12)").attr("stroke", "none");
+      .attr("fill", "rgba(232,119,34,0.12)").attr("stroke", "none"); // PMS 158 orange tint
 
     const lineGen = d3.line().x((d, i) => x(tsDates[i])).y(d => y(d)).curve(d3.curveMonotoneX);
 
@@ -2136,8 +2418,14 @@ const DemandGenerator = (() => {
     const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
     const horizons = [7, 14, 21, 28, 35];
 
+    // Impact map corrected per business logic:
+    // H=7: W1 forecast is within month M only
+    // H=14: W1 still within M; W4 spills into M+1
+    // H=21: W1 still within M; W3 and W4 spill into M+1
+    // H=28: W1 BOP spans into BOTH M and M+1; W2+ affect M+1
+    // H=35: W1 BOP spans M+1 AND M+2; H=35 always looks 5 weeks out
     const impactMap = {
-      "Week 1": { 7: "M", 14: "M", 21: "M", 28: "M+1", 35: "M+1" },
+      "Week 1": { 7: "M", 14: "M", 21: "M", 28: "M, M+1", 35: "M+1, M+2" },
       "Week 2": { 7: "M", 14: "M", 21: "M, M+1", 28: "M+1", 35: "M+1, M+2" },
       "Week 3": { 7: "M", 14: "M", 21: "M+1", 28: "M+1", 35: "M+2" },
       "Week 4": { 7: "M", 14: "M, M+1", 21: "M+1", 28: "M+1", 35: "M+2" }
@@ -2174,11 +2462,11 @@ const DemandGenerator = (() => {
      ═══════════════════════════════════════ */
   (function () {
     const benchmarks = [
-      { label: "Excellent", range: "< 10%", lo: 0, hi: 10, color: "#16a34a" },
-      { label: "Good", range: "10–20%", lo: 10, hi: 20, color: "#65a30d" },
-      { label: "Reasonable", range: "20–30%", lo: 20, hi: 30, color: "#eab308" },
-      { label: "Poor", range: "30–50%", lo: 30, hi: 50, color: "#f97316" },
-      { label: "Inaccurate", range: "> 50%", lo: 50, hi: 70, color: "#dc2626" },
+      { label: "Excellent",   range: "< 10%",  lo: 0,  hi: 10, color: "#00B140" }, // PMS 354 green — kept for %
+      { label: "Good",        range: "10–20%", lo: 10, hi: 20, color: "#97D700" }, // PMS 375 lime
+      { label: "Reasonable",  range: "20–30%", lo: 20, hi: 30, color: "#F1B434" }, // PMS 143 amber
+      { label: "Poor",        range: "30–50%", lo: 30, hi: 50, color: "#E87722" }, // PMS 158 orange
+      { label: "Inaccurate",  range: "> 50%",  lo: 50, hi: 70, color: "#EF3340" }, // PMS 032 red — kept for %
     ];
 
     const container = d3.select("#benchmark-chart");
@@ -2378,134 +2666,157 @@ const DemandGenerator = (() => {
   });
 
   /* ═══════════════════════════════════════
-     6) Horizon Lag Visualization
+     6) Horizon Lag Visualization — Interactive
      ═══════════════════════════════════════ */
   (function () {
-    const container = d3.select("#lag-chart");
-    const cw = container.node().getBoundingClientRect().width;
-    const width = cw;
-    const height = Math.min(320, cw * 0.5);
-    const margin = { top: 25, right: 30, bottom: 35, left: 55 };
-    const iw = width - margin.left - margin.right;
-    const ih = height - margin.top - margin.bottom;
-
-    const svg = container.append("svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMidYMid meet");
-
-    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+    const lagMargin = { top: 30, right: 30, bottom: 40, left: 55 };
 
     // Generate a synthetic daily series: 25 days before today + 35 days after
     const rngL = seededRandom(99);
     const daysBefore = 25;
     const daysAfter = 36; // enough to cover max horizon (35d)
     const nDays = daysBefore + daysAfter;
-    const series = [];
+    const lagSeries = [];
     let sv = 100;
     for (let i = 0; i < nDays; i++) {
       sv += (rngL() - 0.48) * 5 + 0.2;
       sv = Math.max(sv, 30);
-      series.push(sv);
+      lagSeries.push(sv);
     }
-
-    const todayLag = daysBefore; // index of "today" in the series
+    const todayLag = daysBefore;
     const lagStartDate = addDays(TODAY, -daysBefore);
     const lagDates = d3.range(nDays).map(function(i) { return addDays(lagStartDate, i); });
 
-    const x = d3.scaleTime().domain([lagDates[0], lagDates[nDays - 1]]).range([0, iw]);
-    const y = d3.scaleLinear().domain([d3.min(series) - 5, d3.max(series) + 10]).range([ih, 0]);
+    const horizonInsights = {
+      7:  "H=7: The blind spot is only 7 days. Recent patterns are still very relevant. The model sees ~96% of available context.",
+      14: "H=14: Two-week blind spot. Weekly seasonality may help bridge the gap, but day-of-week specifics start to blur.",
+      21: "H=21: Three-week lag. The model must rely on structural patterns like monthly cycles rather than recent observations.",
+      28: "H=28: Four weeks — one full planning cycle. The model is now extrapolating beyond its last observation. Surprising accuracy can occur if the product has strong monthly seasonality.",
+      35: "H=35: Five-week blind spot. In supply chain, this is a full lead-time cycle. Local noise is irrelevant; structural signals dominate. Some seasonal products show <em>lower</em> MAPEx at H=35 than H=7!"
+    };
 
-    // X axis with real dates — show Today + each horizon target date
-    var lagTickDates = [TODAY].concat(HORIZONS.map(function(h) { return addDays(TODAY, h); }));
-    g.append("g").attr("transform", `translate(0,${ih})`)
-      .call(d3.axisBottom(x).tickValues(lagTickDates).tickFormat(d3.timeFormat("%b %d")))
-      .call(g => g.select(".domain").attr("stroke", border))
-      .call(g => g.selectAll(".tick line").attr("stroke", border))
-      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.55rem"));
+    function renderLagChart() {
+      var container = d3.select("#lag-chart");
+      container.selectAll("*").remove();
 
-    // Y axis
-    g.append("g")
-      .call(d3.axisLeft(y).ticks(5))
-      .call(g => g.select(".domain").attr("stroke", border))
-      .call(g => g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"));
+      var selectedH = +d3.select("#lag-slider").property("value");
+      d3.select("#lag-slider-value").text("H=" + selectedH);
+      d3.select("#lag-slider-date").text("Target: " + fmt(addDays(TODAY, selectedH)));
 
-    // Grid
-    g.append("g")
-      .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(""))
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.4));
+      var insight = horizonInsights[selectedH] || "";
+      d3.select("#lag-insight").html("<strong>H=" + selectedH + "d insight:</strong> " + insight);
 
-    // Known data (up to "today")
-    const knownData = series.slice(0, todayLag + 1);
-    const knownDates = lagDates.slice(0, todayLag + 1);
-    const lineGen = d3.line().x(function(d, i) { return x(knownDates[i]); }).y(function(d) { return y(d); }).curve(d3.curveMonotoneX);
+      var cw = container.node().getBoundingClientRect().width;
+      var width = cw;
+      var height = Math.min(320, cw * 0.5);
+      var iw = width - lagMargin.left - lagMargin.right;
+      var ih = height - lagMargin.top - lagMargin.bottom;
 
-    g.append("path").datum(knownData).attr("d", lineGen)
-      .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2.5);
+      var svg = container.append("svg")
+        .attr("viewBox", "0 0 " + width + " " + height)
+        .attr("preserveAspectRatio", "xMidYMid meet");
 
-    // "Today" vertical line
-    g.append("line")
-      .attr("x1", x(TODAY)).attr("x2", x(TODAY))
-      .attr("y1", 0).attr("y2", ih)
-      .attr("stroke", accent).attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
+      var g = svg.append("g").attr("transform", "translate(" + lagMargin.left + "," + lagMargin.top + ")");
 
-    g.append("text")
-      .attr("x", x(TODAY)).attr("y", -8)
-      .attr("text-anchor", "middle").attr("fill", accent)
-      .style("font-size", "0.7rem").style("font-weight", "600").text("Today (" + fmt(TODAY) + ")");
+      var x = d3.scaleTime().domain([lagDates[0], lagDates[nDays - 1]]).range([0, iw]);
+      var y = d3.scaleLinear().domain([d3.min(lagSeries) - 5, d3.max(lagSeries) + 10]).range([ih, 0]);
 
-    // For each horizon, draw the lag gap and prediction point
-    const horizonColors = ["#16a34a", "#2563eb", "#8b5cf6", "#ea580c", "#dc2626"];
+      var lagTickDates = [TODAY, addDays(TODAY, selectedH)];
+      g.append("g").attr("transform", "translate(0," + ih + ")")
+        .call(d3.axisBottom(x).tickValues(lagTickDates).tickFormat(d3.timeFormat("%b %d")))
+        .call(function(g) { g.select(".domain").attr("stroke", border); })
+        .call(function(g) { g.selectAll(".tick line").attr("stroke", border); })
+        .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.62rem"); });
 
-    HORIZONS.forEach(function(h, idx) {
-      const targetDayIdx = todayLag + h;
-      if (targetDayIdx >= nDays) return;
+      g.append("g")
+        .call(d3.axisLeft(y).ticks(5))
+        .call(function(g) { g.select(".domain").attr("stroke", border); })
+        .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.6rem"); });
 
-      const targetDate = lagDates[targetDayIdx];
-      const targetVal = series[targetDayIdx];
-      const color = horizonColors[idx];
+      g.append("g")
+        .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(""))
+        .call(function(g) { g.select(".domain").remove(); })
+        .call(function(g) { g.selectAll(".tick line").attr("stroke", border).attr("stroke-opacity", 0.4); });
 
-      // Dashed lag line
-      g.append("line")
-        .attr("x1", x(TODAY)).attr("x2", x(targetDate))
-        .attr("y1", y(targetVal)).attr("y2", y(targetVal))
-        .attr("stroke", color).attr("stroke-width", 1.5)
-        .attr("stroke-dasharray", "3 3").attr("opacity", 0.7);
+      // Blind spot shading (between today and target)
+      var targetDayIdx = todayLag + selectedH;
+      var blindSpotX1 = x(TODAY);
+      var blindSpotX2 = targetDayIdx < nDays ? x(lagDates[targetDayIdx]) : iw;
+      g.append("rect")
+        .attr("x", blindSpotX1).attr("y", 0)
+        .attr("width", blindSpotX2 - blindSpotX1).attr("height", ih)
+        .attr("fill", "rgba(204,0,0,0.06)")
+        .attr("stroke", orange).attr("stroke-width", 1.5).attr("stroke-dasharray", "6 3");
 
-      // Prediction target dot
-      g.append("circle")
-        .attr("cx", x(targetDate)).attr("cy", y(targetVal))
-        .attr("r", 5).attr("fill", color).attr("stroke", "#fff").attr("stroke-width", 1.5);
+      g.append("text")
+        .attr("x", (blindSpotX1 + blindSpotX2) / 2).attr("y", 14)
+        .attr("text-anchor", "middle").attr("fill", orange)
+        .style("font-size", "0.65rem").style("font-weight", "700")
+        .text("← Blind Spot (" + selectedH + "d) →");
 
-      // Future series (faded)
-      const futureSlice = series.slice(todayLag, targetDayIdx + 1);
-      const futureDates = lagDates.slice(todayLag, targetDayIdx + 1);
-      const futureLine = d3.line()
-        .x(function(d, i) { return x(futureDates[i]); })
+      // Known data
+      var knownData = lagSeries.slice(0, todayLag + 1);
+      var knownDates = lagDates.slice(0, todayLag + 1);
+      var lineGen = d3.line()
+        .x(function(d, i) { return x(knownDates[i]); })
         .y(function(d) { return y(d); })
         .curve(d3.curveMonotoneX);
 
-      g.append("path").datum(futureSlice).attr("d", futureLine)
-        .attr("fill", "none").attr("stroke", color)
-        .attr("stroke-width", 1).attr("stroke-dasharray", "2 3").attr("opacity", 0.35);
+      // Shaded known area
+      var knownArea = d3.area()
+        .x(function(d, i) { return x(knownDates[i]); })
+        .y0(ih).y1(function(d) { return y(d); })
+        .curve(d3.curveMonotoneX);
+      g.insert("path", ":first-child").datum(knownData).attr("d", knownArea)
+        .attr("fill", teal).attr("opacity", 0.08);
 
-      // Horizon label with date
+      g.append("path").datum(knownData).attr("d", lineGen)
+        .attr("fill", "none").attr("stroke", teal).attr("stroke-width", 2.5);
+
+      // Today line
+      g.append("line")
+        .attr("x1", x(TODAY)).attr("x2", x(TODAY))
+        .attr("y1", 0).attr("y2", ih)
+        .attr("stroke", accent).attr("stroke-width", 1.5).attr("stroke-dasharray", "4 3");
       g.append("text")
-        .attr("x", x(targetDate) + 6).attr("y", y(targetVal) + 4)
-        .attr("fill", color).style("font-size", "0.6rem").style("font-weight", "600")
-        .text(h + "d (" + fmt(targetDate) + ")");
-    });
+        .attr("x", x(TODAY)).attr("y", -10)
+        .attr("text-anchor", "middle").attr("fill", accent)
+        .style("font-size", "0.7rem").style("font-weight", "600").text("Today (" + fmt(TODAY) + ")");
 
-    // Shaded "known" region
-    const knownArea = d3.area()
-      .x(function(d, i) { return x(knownDates[i]); })
-      .y0(ih)
-      .y1(function(d) { return y(d); })
-      .curve(d3.curveMonotoneX);
+      // Prediction target
+      if (targetDayIdx < nDays) {
+        var targetDate = lagDates[targetDayIdx];
+        var targetVal = lagSeries[targetDayIdx];
 
-    g.insert("path", ":first-child").datum(knownData).attr("d", knownArea)
-      .attr("fill", teal).attr("opacity", 0.06);
+        // Future series faded
+        var futureSlice = lagSeries.slice(todayLag, targetDayIdx + 1);
+        var futureDates = lagDates.slice(todayLag, targetDayIdx + 1);
+        var futureLine = d3.line()
+          .x(function(d, i) { return x(futureDates[i]); })
+          .y(function(d) { return y(d); })
+          .curve(d3.curveMonotoneX);
+        g.append("path").datum(futureSlice).attr("d", futureLine)
+          .attr("fill", "none").attr("stroke", orange)
+          .attr("stroke-width", 1.2).attr("stroke-dasharray", "3 3").attr("opacity", 0.4);
 
+        g.append("circle")
+          .attr("cx", x(targetDate)).attr("cy", y(targetVal))
+          .attr("r", 7).attr("fill", orange).attr("stroke", "#fff").attr("stroke-width", 2)
+          .attr("class", "pulse-dot");
+
+        g.append("text")
+          .attr("x", x(targetDate) + 10).attr("y", y(targetVal) + 4)
+          .attr("fill", orange).style("font-size", "0.68rem").style("font-weight", "700")
+          .text("Prediction Target (" + fmt(targetDate) + ")");
+      }
+    }
+
+    renderLagChart();
+    var lagSlider = document.getElementById('lag-slider');
+    if (lagSlider) lagSlider.addEventListener('input', renderLagChart);
+
+    // Register for resize
+    window._renderLagChart = renderLagChart;
   })();
 
   /* ═══════════════════════════════════════
@@ -2609,6 +2920,7 @@ const DemandGenerator = (() => {
 
   /* ═══════════════════════════════════════
      9) Weekly Forecast Change MAPEx Impact
+        Uses volume-weighted formula: Σ|E| / Σ|A|
      ═══════════════════════════════════════ */
   function renderWeeklyHeatmap() {
     var tbody = d3.select("#weekly-heatmap-body");
@@ -2624,42 +2936,91 @@ const DemandGenerator = (() => {
       { label: "Week 4 (" + fmt(addDays(TODAY, 21)) + ")", weekStart: 21 }
     ];
 
-    // Simulate: revising forecasts in each week affects horizons differently
-    // The logic: if you improve week W forecasts, horizon H is affected
-    // proportional to how much of the H-day bucket overlaps with that week
+    // Simulate baseline demand: stable at 100 units/day with small noise
+    var rngHeat = seededRandom(321);
+    var simulDays = 35;
+    var baseActuals = [];
+    for (var dd = 0; dd < simulDays; dd++) {
+      baseActuals.push(100 + (rngHeat() - 0.5) * 10);
+    }
+
+    // Volume-Weighted MAPEx: MAPEx_H = Σ|F_d - A_d| / Σ A_d
+    // Baseline: forecasts are biased 20% high uniformly
+    function computeBaselineMAPEx(H) {
+      var totalTAE = 0, totalActuals = 0;
+      var baselineError = 0.20; // 20% baseline error
+      var maxV = simulDays - H;
+      for (var vi = 0; vi < maxV; vi++) {
+        for (var d = vi; d < vi + H; d++) {
+          var act = baseActuals[d] || 100;
+          var fore = act * (1 + baselineError);
+          totalTAE += Math.abs(fore - act);
+          totalActuals += act;
+        }
+      }
+      return totalActuals > 0 ? (totalTAE / totalActuals) * 100 : 0;
+    }
+
+    // Revised MAPEx: revision improves forecasts in the overlapping days
+    // by revisionPct% of the absolute error in those days
+    function computeRevisedMAPEx(H, weekStart) {
+      var totalTAE = 0, totalActuals = 0;
+      var baselineError = 0.20;
+      var maxV = simulDays - H;
+      for (var vi = 0; vi < maxV; vi++) {
+        for (var d = vi; d < vi + H; d++) {
+          var act = baseActuals[d] || 100;
+          var dayRelative = d; // day relative to today
+          var fore;
+          if (dayRelative >= weekStart && dayRelative < weekStart + 7) {
+            // This day's forecast was revised — error reduced by revisionPct
+            var origError = act * baselineError;
+            var reducedError = origError * (1 - revisionPct / 100);
+            fore = act + reducedError;
+          } else {
+            fore = act * (1 + baselineError);
+          }
+          totalTAE += Math.abs(fore - act);
+          totalActuals += act;
+        }
+      }
+      return totalActuals > 0 ? (totalTAE / totalActuals) * 100 : 0;
+    }
+
     weeks.forEach(function(week) {
       var tr = tbody.append("tr");
       tr.append("td").text(week.label).style("font-weight", "600").style("font-size", "0.72rem");
 
       HORIZONS.forEach(function(H) {
-        // Days in the horizon bucket that overlap with this week
         var overlapDays = 0;
         for (var d = 0; d < H; d++) {
-          var dayInFuture = d;
-          if (dayInFuture >= week.weekStart && dayInFuture < week.weekStart + 7) {
-            overlapDays++;
-          }
+          if (d >= week.weekStart && d < week.weekStart + 7) overlapDays++;
         }
-
         var overlapFraction = overlapDays / H;
-        // MAPEx improvement = revision% * overlap fraction * decay factor
-        var decayFactor = 1 / (1 + week.weekStart / 14); // further weeks have less impact
-        var improvement = revisionPct * overlapFraction * decayFactor;
 
-        var intensity = Math.min(improvement / (revisionPct * 0.8), 1);
-        var bgColor = "rgba(22,163,74," + (intensity * 0.35) + ")"; // green
+        // Volume-weighted MAPEx improvement: Σ|E_revised| / Σ|A| - Σ|E_baseline| / Σ|A|
+        var baseMAPEx = computeBaselineMAPEx(H);
+        var revisedMAPEx = computeRevisedMAPEx(H, week.weekStart);
+        var improvement = baseMAPEx - revisedMAPEx; // positive = improvement
+
+        var intensity = improvement > 0 ? Math.min(improvement / (revisionPct * 0.5 * 0.2), 1) : 0;
+        var bgColor = improvement > 0.001
+          ? "rgba(22,163,74," + (intensity * 0.45) + ")"
+          : "transparent";
 
         var td = tr.append("td")
-          .text(improvement > 0.01 ? "-" + improvement.toFixed(2) + "%" : "--")
+          .text(improvement > 0.001 ? "-" + improvement.toFixed(2) + "%" : "--")
           .style("background", bgColor)
-          .style("color", improvement > 0.01 ? green : textMuted);
+          .style("color", improvement > 0.001 ? green : textMuted);
 
         td.on("mouseover", function(evt) {
           showTooltip(evt,
-            "Revising " + week.label + " forecasts by " + revisionPct + "%<br>" +
-            "Horizon: " + H + " days<br>" +
-            "Overlap: " + overlapDays + "/" + H + " days (" + (overlapFraction * 100).toFixed(0) + "%)<br>" +
-            "MAPEx improvement: " + (improvement > 0.01 ? "-" + improvement.toFixed(2) + "%" : "negligible")
+            "Revising " + week.label + " by " + revisionPct + "%<br>" +
+            "H=" + H + " days | Overlap: " + overlapDays + "/" + H + " days<br>" +
+            "Baseline MAPEx: " + baseMAPEx.toFixed(2) + "%<br>" +
+            "Revised MAPEx:  " + revisedMAPEx.toFixed(2) + "%<br>" +
+            "Volume-weighted improvement: " + (improvement > 0.001 ? "-" + improvement.toFixed(2) + "%" : "negligible") + "<br>" +
+            "<em style='color:#aaa'>Formula: Σ|E_revised|/Σ|A| vs Σ|E_baseline|/Σ|A|</em>"
           );
         }).on("mouseout", hideTooltip);
 
@@ -2667,9 +3028,12 @@ const DemandGenerator = (() => {
           d3.select("#weekly-heatmap-detail")
             .style("display", "block")
             .html(
-              "<strong>Revising Week " + ((week.weekStart / 7) + 1) + " forecasts (" + fmt(addDays(TODAY, week.weekStart)) + " \u2013 " + fmt(addDays(TODAY, week.weekStart + 6)) + ")</strong><br>" +
-              "At H=" + H + "d: " + overlapDays + " of " + H + " days overlap (" + (overlapFraction * 100).toFixed(0) + "%), " +
-              "expected MAPEx improvement: <strong style='color:" + green + "'>" + (improvement > 0.01 ? "-" + improvement.toFixed(2) + "%" : "negligible") + "</strong>"
+              "<strong>Revising Week " + ((week.weekStart / 7) + 1) +
+              " (" + fmt(addDays(TODAY, week.weekStart)) + " \u2013 " + fmt(addDays(TODAY, week.weekStart + 6)) + ")</strong><br>" +
+              "At H=" + H + "d: " + overlapDays + " of " + H + " days overlap (" + (overlapFraction * 100).toFixed(0) + "%)<br>" +
+              "Volume-weighted MAPEx: " + baseMAPEx.toFixed(2) + "% → " + revisedMAPEx.toFixed(2) + "%" +
+              " (Δ = <strong style='color:" + green + "'>" + (improvement > 0.001 ? "-" + improvement.toFixed(2) + "%" : "negligible") + "</strong>)<br>" +
+              "<em style='font-size:0.78rem;'>Using Σ|E|/Σ|A| formula (volume-weighted), not simple percentage average</em>"
             );
         });
       });
@@ -2797,6 +3161,157 @@ const DemandGenerator = (() => {
   }
 
   /* ═══════════════════════════════════════
+     3d) Monthly Aggregation Flow Chart
+     ═══════════════════════════════════════ */
+  (function() {
+    var container = d3.select("#monthly-flow-chart");
+    if (!container.node()) return;
+
+    var nVersions = 22;
+    var rngMo = seededRandom(888);
+    var versions = [];
+    for (var i = 0; i < nVersions; i++) {
+      var act = 80 + rngMo() * 60;
+      var errRate = 0.08 + rngMo() * 0.25; // 8–33% error per version
+      var tae = act * errRate;
+      versions.push({ idx: i + 1, act: act, tae: tae, pct: (tae / act) * 100 });
+    }
+
+    var totalTAE = d3.sum(versions, function(d) { return d.tae; });
+    var totalAct = d3.sum(versions, function(d) { return d.act; });
+    var correctMAPEx = (totalTAE / totalAct) * 100;
+    var wrongAvg = d3.mean(versions, function(d) { return d.pct; });
+
+    var cw = container.node().getBoundingClientRect().width;
+    var width = cw;
+    var height = Math.min(220, cw * 0.35);
+    var margin = { top: 30, right: 20, bottom: 50, left: 50 };
+    var iw = width - margin.left - margin.right;
+    var ih = height - margin.top - margin.bottom;
+
+    var svg = container.append("svg")
+      .attr("viewBox", "0 0 " + width + " " + height)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+    var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scaleBand().domain(versions.map(function(d) { return d.idx; })).range([0, iw]).padding(0.1);
+    var yMax = d3.max(versions, function(d) { return d.pct; }) * 1.2;
+    var y = d3.scaleLinear().domain([0, yMax]).range([ih, 0]);
+
+    // Bars for each version's individual MAPEx
+    g.selectAll(".mo-bar").data(versions).enter()
+      .append("rect")
+      .attr("x", function(d) { return x(d.idx); })
+      .attr("width", x.bandwidth())
+      .attr("y", function(d) { return y(d.pct); })
+      .attr("height", function(d) { return ih - y(d.pct); })
+      .attr("fill", accent)
+      .attr("opacity", 0.55)
+      .attr("rx", 2)
+      .on("mouseover", function(evt, d) {
+        showTooltip(evt, "Version " + d.idx + "<br>Actuals: " + d.act.toFixed(0) + "<br>TAE: " + d.tae.toFixed(0) + "<br>This version MAPEx: " + d.pct.toFixed(1) + "%");
+      })
+      .on("mouseout", hideTooltip);
+
+    // Wrong average line
+    g.append("line")
+      .attr("x1", 0).attr("x2", iw)
+      .attr("y1", y(wrongAvg)).attr("y2", y(wrongAvg))
+      .attr("stroke", orange).attr("stroke-width", 2.5).attr("stroke-dasharray", "8 4");
+    g.append("text")
+      .attr("x", iw + 2).attr("y", y(wrongAvg) - 4)
+      .attr("fill", orange).style("font-size", "0.6rem").style("font-weight", "700")
+      .text("Wrong avg: " + wrongAvg.toFixed(1) + "%");
+
+    // Correct volume-weighted line
+    g.append("line")
+      .attr("x1", 0).attr("x2", iw)
+      .attr("y1", y(correctMAPEx)).attr("y2", y(correctMAPEx))
+      .attr("stroke", teal).attr("stroke-width", 2.5);
+    g.append("text")
+      .attr("x", iw + 2).attr("y", y(correctMAPEx) + 10)
+      .attr("fill", teal).style("font-size", "0.6rem").style("font-weight", "700")
+      .text("Correct MAPEx: " + correctMAPEx.toFixed(1) + "%");
+
+    // Axes
+    g.append("g").attr("transform", "translate(0," + ih + ")")
+      .call(d3.axisBottom(x).tickValues(versions.filter(function(d, i) { return i % 4 === 0 || i === nVersions - 1; }).map(function(d) { return d.idx; }))
+        .tickFormat(function(d) { return "V" + d; }))
+      .call(function(g) { g.select(".domain").attr("stroke", border); })
+      .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.58rem"); });
+
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(4).tickFormat(function(d) { return d.toFixed(0) + "%"; }))
+      .call(function(g) { g.select(".domain").attr("stroke", border); })
+      .call(function(g) { g.selectAll(".tick text").attr("fill", textMuted).style("font-size", "0.58rem"); });
+
+    // Title annotations
+    g.append("text")
+      .attr("x", iw / 2).attr("y", -15)
+      .attr("text-anchor", "middle").attr("fill", textMuted)
+      .style("font-size", "0.68rem")
+      .text("Each bar = one daily version's MAPEx% (volume varies). Lines = Monthly MAPEx by two methods.");
+  })();
+
+  /* ═══════════════════════════════════════
+     11b) Asymmetric Penalty Simulator
+     ═══════════════════════════════════════ */
+  var penaltyMode = 'over'; // 'over' = over-forecast, 'under' = under-forecast
+  var BASE_ACTUAL = 100;
+
+  window.setPenaltyMode = function(mode) {
+    penaltyMode = mode;
+    document.getElementById('penalty-over-btn').classList.toggle('active', mode === 'over');
+    document.getElementById('penalty-under-btn').classList.toggle('active', mode === 'under');
+    updatePenaltyDisplay();
+  };
+
+  function updatePenaltyDisplay() {
+    var errSlider = document.getElementById('penalty-error-slider');
+    if (!errSlider) return;
+    var absError = +errSlider.value;
+    document.getElementById('penalty-error-value').textContent = absError + ' units';
+
+    var actual, forecast, pct, explanation;
+    if (penaltyMode === 'over') {
+      // Over-forecast: forecast > actual → actual is the denominator (smaller)
+      actual = BASE_ACTUAL;
+      forecast = actual + absError;
+      pct = (absError / actual) * 100;
+      explanation = '<strong>Over-forecast (under-ship):</strong> Forecast = ' + forecast + ', Actual = ' + actual + '<br>' +
+        'Error = |' + actual + ' − ' + forecast + '| / ' + actual + ' = <strong>' + pct.toFixed(1) + '%</strong><br>' +
+        '<em>Denominator = actual (the lower number → higher %)</em>';
+    } else {
+      // Under-forecast: forecast < actual → actual is the denominator (larger)
+      forecast = BASE_ACTUAL;
+      actual = forecast + absError;
+      pct = (absError / actual) * 100;
+      explanation = '<strong>Under-forecast (over-ship):</strong> Forecast = ' + forecast + ', Actual = ' + actual + '<br>' +
+        'Error = |' + actual + ' − ' + forecast + '| / ' + actual + ' = <strong>' + pct.toFixed(1) + '%</strong><br>' +
+        '<em>Denominator = actual (the larger number → lower %)</em>';
+    }
+
+    document.getElementById('penalty-pct').textContent = pct.toFixed(1) + '%';
+    document.getElementById('penalty-explanation').innerHTML = explanation;
+
+    var fillWidth = Math.min(pct, 100);
+    var fill = document.getElementById('penalty-fill');
+    var rest = document.getElementById('penalty-rest');
+    fill.style.width = fillWidth + '%';
+    fill.textContent = pct.toFixed(1) + '%';
+    fill.style.background = penaltyMode === 'over' ? 'var(--orange)' : 'var(--teal)';
+    rest.style.background = 'var(--teal-light)';
+    document.getElementById('penalty-pct').style.color = penaltyMode === 'over' ? 'var(--orange)' : 'var(--teal)';
+  }
+
+  var penaltySlider = document.getElementById('penalty-error-slider');
+  if (penaltySlider) {
+    penaltySlider.addEventListener('input', updatePenaltyDisplay);
+    updatePenaltyDisplay();
+  }
+
+  /* ═══════════════════════════════════════
      11) Responsive resize
      ═══════════════════════════════════════ */
   let resizeTimer;
@@ -2808,6 +3323,7 @@ const DemandGenerator = (() => {
       renderMAPExChart();
       renderDailyVersionsChart();
       renderWeeklyHeatmap();
+      if (typeof window._renderLagChart === 'function') window._renderLagChart();
     }, 200);
   });
 
