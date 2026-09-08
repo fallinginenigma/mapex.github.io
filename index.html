@@ -702,7 +702,7 @@
 <!-- ══════════════ HERO ══════════════ -->
 <header class="hero">
   <h1>MAPE<span>x</span></h1>
-  <p>A visual, interactive guide to <strong>Mean Absolute Percentage Error</strong> and how forecast error changes across prediction horizons.</p>
+  <p>A visual, interactive guide to forecast error and the IDF <strong>MAPEx</strong> metric across prediction horizons.</p>
 </header>
 
 <!-- ══════════════ ARTICLE ══════════════ -->
@@ -769,15 +769,15 @@
   <h2>See MAPE in Action</h2>
   <p>
     The table below shows a simple example. <strong>Drag the sliders</strong> to change the
-    actual values and watch MAPE update in real time. Toggle between Simple MAPE and
-    Volume-Weighted MAPEx to see how they differ when volumes vary across periods.
+    actual values and watch the error measures update in real time. Toggle between Simple MAPE
+    and the horizon-aggregated MAPEx comparison to see how volume changes the result.
   </p>
 
   <div class="vis-card">
     <h4>Interactive MAPE / MAPEx Calculator</h4>
     <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
       <button class="scenario-btn active" id="mode-simple-mape" onclick="setCalcMode('simple')">Simple MAPE</button>
-      <button class="scenario-btn" id="mode-volume-mapex" onclick="setCalcMode('volume')">Volume-Weighted MAPEx</button>
+      <button class="scenario-btn" id="mode-volume-mapex" onclick="setCalcMode('volume')">MAPEx Comparison</button>
     </div>
     <div id="calc-mode-desc" class="callout callout-teal" style="font-size:0.85rem;margin-bottom:0.75rem;">
       <strong>Simple MAPE:</strong> Each period contributes equally — a 50-unit error on 100 actuals (50%) is weighted the same as a 50-unit error on 1000 actuals (5%). Low-volume periods can dominate the average.
@@ -796,8 +796,8 @@
       </table>
       <div id="mape-result" class="mape-result"></div>
       <div id="mapex-comparison" style="display:none;margin-top:0.5rem;padding:0.75rem;background:var(--accent-light);border-radius:8px;font-size:0.85rem;">
-        <strong>Why they differ:</strong> Volume-Weighted MAPEx = Σ|errors| / Σactuals = <span id="mapex-num"></span> / <span id="mapex-den"></span> = <span id="mapex-ratio"></span>%<br>
-        <em>High-volume periods pull the result toward their error rate; low-volume outliers are naturally down-weighted.</em>
+        <strong>MAPEx comparison:</strong> Σ|errors| / Σactuals = <span id="mapex-num"></span> / <span id="mapex-den"></span> = <span id="mapex-ratio"></span>%<br>
+        <em>This small table demonstrates the aggregation rule; production MAPEx also groups rolling horizon buckets by Brand Code, Ship-From Location, and Ship-To Country.</em>
       </div>
     </div>
   </div>
@@ -806,7 +806,7 @@
     <strong>MAPE Sensitivity to Volume:</strong> High-volume periods can mathematically mask
     absolute errors due to a larger denominator — when actuals double but the absolute miss stays
     the same, MAPE halves (e.g., |error|/100 = 10% vs. |error|/200 = 5%). This is a structural
-    property of the metric, not a sign of improved forecasting accuracy. Exercise caution when
+    property of the metric, not a sign of improved forecast performance. Exercise caution when
     comparing MAPE or MAPEx across products or time periods with significantly different volume levels.
   </div>
 
@@ -865,7 +865,7 @@
       <div class="control-group">
         <label>Forecast Horizon (x)</label>
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="horizon-slider" min="0" max="4" value="0" step="1">
+          <input type="range" id="horizon-slider" min="0" max="5" value="0" step="1">
           <span class="value-display" id="horizon-value">7</span>
           <span style="font-size:0.78rem;color:var(--text-muted);">days ahead</span>
         </div>
@@ -896,7 +896,7 @@
   </p>
 
   <div class="vis-card">
-    <h4>MAPEx — MAPE at Each Forecast Horizon</h4>
+    <h4>Horizon Error Demonstration — Synthetic Scenario</h4>
     <div class="legend" style="margin-bottom:0.5rem;">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--accent)"></div> Model</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#d4d4d4"></div> Previous (ghost)</div>
@@ -933,9 +933,10 @@
     <strong>⚠️ Important Distinction: MAPE ≠ MAPEx</strong>
     <p style="margin:0.5rem 0 0.75rem;">
       Standard <strong>MAPE</strong> averages individual percentage errors — each period contributes equally
-      regardless of volume. <strong>MAPEx</strong> is a <em>volume-weighted</em> metric (also known as
-      WMAPE): it sums all absolute errors, then divides by the sum of all actuals. This means
-      high-volume periods dominate MAPEx while low-volume periods dominate standard MAPE.
+      regardless of volume. <strong>MAPEx</strong> is a <em>volume-weighted</em> metric: it sums
+      all absolute errors, then divides by the sum of actuals. In IDF, this aggregation is
+      applied to each horizon-specific rolling forecast-version bucket, so high-volume periods
+      have greater influence than they do in standard MAPE.
     </p>
     <table style="width:100%;border-collapse:collapse;font-size:0.82rem;font-family:var(--mono);">
       <thead>
@@ -962,13 +963,14 @@
       </tbody>
     </table>
     <p style="margin:0.6rem 0 0;font-size:0.85rem;">
-      The rest of this page uses the <strong>MAPEx</strong> (volume-weighted) definition unless stated otherwise.
+      The rest of this page uses the IDF <strong>MAPEx</strong> definition unless stated otherwise.
     </p>
   </div>
   <p>
     The correct MAPEx formula uses a <strong>rolling daily version</strong> approach.
-    For each day (version date), we create a forecast for the next H days and compare
-    it to actual values once they're available.
+    For each eligible version date (every day except Sunday), we create a forecast for the next H days
+    and compare it to actual values once they're available. The calculation grain is Brand Code,
+    Ship-From Location, and Ship-To Country.
   </p>
 
   <div class="formula-card">
@@ -981,7 +983,7 @@
   </div>
 
   <div class="callout callout-teal">
-    <strong>Interpretation:</strong> MAPEx is a volume-weighted error metric. A lower percentage indicates a more accurate forecast. The goal is to minimize this value.
+    <strong>Interpretation:</strong> MAPEx is an IDF horizon-specific forecast error metric. A lower percentage means less error. It is aggregated across the overlapping eligible version buckets, rather than calculated as an average of daily percentages.
   </div>
 
   <h3>Daily Versions Explained</h3>
@@ -997,29 +999,30 @@
     <strong>Critical Rule: Monthly MAPEx is NOT the average of daily percentages.</strong><br>
     Monthly MAPEx must be computed as:
     <br><br>
-    <code style="font-family:var(--mono);font-size:0.9rem;">Monthly MAPEx = Σ TAE (across all ~22 business-day versions) / Σ Actuals (across all ~22 versions)</code>
+    <code style="font-family:var(--mono);font-size:0.9rem;">Monthly MAPEx = Σ TAE (across all eligible versions) / Σ Actuals (across all eligible versions)</code>
     <br><br>
     Averaging daily percentages instead gives incorrect results because each day's percentage
     is influenced by its own actuals volume. A high-volume day with 5% error and a
     low-volume day with 50% error should NOT contribute equally — the volume-weighted
-    sum correctly handles this. With ~22 working versions per month (excluding weekends),
-    the formula is:
+    sum correctly handles this. Versions are available every day except Sunday; the exact count
+    depends on the dates included in the month. The formula is:
     <br><br>
     <code style="font-family:var(--mono);font-size:0.9rem;">Monthly MAPEx = (TAE_v1 + TAE_v2 + ... + TAE_v22) / (A_v1 + A_v2 + ... + A_v22)</code>
   </div>
 
   <!-- ── Monthly Aggregation Flow ── -->
   <div class="vis-card" style="margin-bottom:2rem;">
-    <h4>Monthly Aggregation Flow — How 22 Daily Versions Become One Monthly MAPEx</h4>
+    <h4>Monthly Aggregation Flow — How Rolling Versions Become One Monthly MAPEx</h4>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">
-      Each business day generates a new forecast version. For a monthly MAPEx, we collect
-      all ~22 versions (excluding weekends), sum their TAE and Actuals, then divide once.
+      Each day except Sunday generates a new forecast version. For a monthly MAPEx, we collect
+      the eligible rolling versions whose H-day buckets are in scope, sum their TAE and Actuals,
+      then divide once. The buckets overlap by design.
       We do <strong>NOT</strong> average the daily percentages.
     </p>
     <div id="monthly-flow-chart"></div>
     <div class="callout callout-orange" style="margin-top:1rem;font-size:0.82rem;">
-      <strong>Wrong approach (simple average):</strong> (MAPEx_v1 + MAPEx_v2 + ... + MAPEx_v22) / 22<br>
-      <strong>Correct MAPEx approach:</strong> (TAE_v1 + TAE_v2 + ... + TAE_v22) / (A_v1 + A_v2 + ... + A_v22)<br>
+      <strong>Wrong approach (simple average):</strong> average the MAPEx percentage from each version<br>
+      <strong>Correct MAPEx approach:</strong> (TAE_v1 + TAE_v2 + ... + TAE_vn) / (A_v1 + A_v2 + ... + A_vn)<br>
       The difference can be significant when daily volumes vary (e.g., weekend spikes or promotions).
     </div>
   </div>
@@ -1035,6 +1038,7 @@
           <option value="21">21 days</option>
           <option value="28">28 days</option>
           <option value="35">35 days</option>
+          <option value="42">42 days</option>
         </select>
       </div>
       <div class="control-group">
@@ -1153,8 +1157,9 @@
   <div class="callout callout-orange">
     <strong>Division by zero:</strong> If any actual value Aₜ is zero, MAPE is undefined.
     This makes MAPE unsuitable for intermittent or sparse data. MAPEx mitigates this by dividing
-    the sum of errors by the sum of actuals across the entire bucket — a single zero period
-    doesn't blow up the metric, but a bucket of all-zero actuals still causes division by zero.
+    the sum of errors by the signed sum of actuals across the entire bucket — a single zero period
+    doesn't blow up the metric. Negative actuals can represent returns; if the aggregate actual
+    denominator is zero or negative, MAPEx is reported as unavailable.
   </div>
 
   <p>
@@ -1259,9 +1264,11 @@
   <!-- ── Section 10: Upload your own data ── -->
   <h2>Try Your Own Data</h2>
   <p>
-    Upload a CSV with columns <code>actual</code> and <code>forecast</code> to compute your
-    own MAPE. Optionally include a <code>horizon</code> column (e.g. 7, 14, 21, 28, 35) to
-    see your own MAPEx curve.
+    Upload a simplified educational CSV with columns <code>actual</code> and <code>forecast</code>
+    to compute a comparison error. Optionally include a <code>horizon</code> column (e.g. 7, 14,
+    21, 28, 35, 42) to see a horizon error curve. This uploader is not the production IDF MAPEx
+    data contract because it has no version date or Brand Code, Ship-From Location, or Ship-To
+    Country fields.
   </p>
 
   <div class="vis-card">
@@ -1413,7 +1420,7 @@
   <div class="step-cards">
     <div class="step-card" style="border-color:var(--pg-blue);border-top:3px solid var(--pg-yellow);">
       <h5>MAPEx is intuitive</h5>
-      <p>A volume-weighted percentage-based error that's easy to communicate and compare across datasets.</p>
+      <p>A horizon-specific, volume-weighted error for comparing rolling forecast versions.</p>
     </div>
     <div class="step-card" style="border-color:var(--pg-blue);border-top:3px solid var(--pg-sky);">
       <h5>Horizon matters — but isn't always monotone</h5>
@@ -1430,14 +1437,14 @@
 
     <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px;">About the MAPEx Metric</h3>
 
-    <p><strong>MAPEx</strong> is our core metric for measuring demand planning forecast error. Unlike a standard Mean Absolute Percentage Error (MAPE), MAPEx is a <strong>volume-weighted</strong> measure.</p>
+    <p><strong>MAPEx</strong> is our IDF metric for measuring demand planning forecast error. Unlike standard Mean Absolute Percentage Error (MAPE), MAPEx aggregates absolute differences across each horizon-specific rolling forecast version.</p>
 
     <ul>
         <li><strong>Volume-Weighted:</strong> It aggregates all absolute errors first, then divides by the sum of all actuals. This means that high-volume products have a greater impact on the final score, which correctly reflects their business importance.</li>
 
-        <li><strong>Handles Zeroes (Mostly):</strong> Because MAPEx divides total absolute error by the <em>sum</em> of all actuals across the bucket (rather than averaging individual ratios), a single zero-actual period doesn't cause a division-by-zero — it simply contributes zero to the denominator sum. However, if <em>all</em> actual values within the entire bucket are zero (e.g., a new product with no sales history in the forecast window), MAPEx is still undefined. For truly intermittent demand, consider complementary metrics like RMSSE or coverage-based measures.</li>
+        <li><strong>Handles Zeroes and Returns Carefully:</strong> A single zero-actual period does not cause division by zero because MAPEx uses the aggregate actual denominator. Negative actuals can represent returns. If the signed aggregate actual denominator is zero or negative, MAPEx is reported as unavailable. For intermittent demand, consider complementary metrics like RMSSE or coverage-based measures.</li>
 
-        <li><strong>Forecast Horizon (X):</strong> In practice, MAPEx is always measured over a specific lead time or "horizon" (e.g., 7, 14, 21 days), denoted as MAPEx7, MAPEx14, etc. This calculator demonstrates the core formula used for any given horizon.</li>
+        <li><strong>Forecast Horizon (X):</strong> In practice, MAPEx is measured over a specific horizon (commonly 7, 14, 21, 28, 35, or 42 days), denoted as MAPEx7, MAPEx14, and so on. Each eligible version contributes its rolling horizon bucket.</li>
     </ul>
 
   </div>
@@ -1525,7 +1532,7 @@ const DemandGenerator = (() => {
     return mean + stddev * Math.sqrt(-2 * Math.log(u1 || 1e-10)) * Math.cos(2 * Math.PI * u2);
   }
 
-  const HORIZONS = [7, 14, 21, 28, 35];
+  const HORIZONS = [7, 14, 21, 28, 35, 42];
   const NUM_DAYS = 90;
 
   function stableDemand() {
@@ -1610,7 +1617,10 @@ const DemandGenerator = (() => {
     const mapex = {};
     for (const h of HORIZONS) {
       let totalAbsError = 0, totalActuals = 0;
+      const versionStart = new Date(2024, 0, 1);
       for (let v = 0; v <= NUM_DAYS - h; v++) {
+        const versionDate = new Date(versionStart.getTime() + v * 86400000);
+        if (versionDate.getDay() === 0) continue;
         for (let d = v; d < v + h; d++) {
           totalAbsError += Math.abs(forecasts[h][d] - actuals[d]);
           totalActuals += actuals[d];
@@ -1649,7 +1659,7 @@ const DemandGenerator = (() => {
   const ghost   = "#B8CCE8";
 
   // Day-based horizons
-  const HORIZONS = [7, 14, 21, 28, 35];
+  const HORIZONS = [7, 14, 21, 28, 35, 42];
 
   // Dynamic "today" — always the current system date
   const TODAY = new Date();
@@ -1662,6 +1672,14 @@ const DemandGenerator = (() => {
   // Helper: add days to a date
   function addDays(date, n) {
     return new Date(date.getTime() + n * 86400000);
+  }
+
+  function previousEligibleVersion(date) {
+    var candidate = new Date(date.getTime());
+    do {
+      candidate = addDays(candidate, -1);
+    } while (candidate.getDay() === 0);
+    return candidate;
   }
 
   // Day-of-week names
@@ -1690,8 +1708,12 @@ const DemandGenerator = (() => {
     if (el) el.textContent = fmtFull(TODAY);
 
     var latestVersion = addDays(TODAY, -14 + 1); // Version whose bucket ends today
-    var prevVersion = addDays(latestVersion, -1);
-    var earliestVersion = addDays(TODAY, -14 - 14 + 1); // ~14 versions back
+    while (latestVersion.getDay() === 0) latestVersion = addDays(latestVersion, -1);
+    var prevVersion = previousEligibleVersion(latestVersion);
+    var earliestVersion = prevVersion;
+    for (var versionStep = 1; versionStep < 14; versionStep++) {
+      earliestVersion = previousEligibleVersion(earliestVersion);
+    }
     var listEl = document.getElementById("dv-versions-list");
     if (listEl) {
       listEl.innerHTML =
@@ -1748,7 +1770,7 @@ const DemandGenerator = (() => {
       compEl.style.display = 'none';
     } else {
       descEl.className = 'callout callout-orange';
-      descEl.innerHTML = '<strong>Volume-Weighted MAPEx:</strong> Uses Σ|errors| / Σactuals — high-volume periods are weighted proportionally to their size. A 50-unit error on 1000 actuals barely moves the needle; the same error on 10 actuals dominates a Simple MAPE but is correctly down-weighted here.';
+      descEl.innerHTML = '<strong>MAPEx comparison:</strong> Uses Σ|errors| / Σactuals for this table. In IDF, the same aggregation is applied across each horizon-specific rolling version bucket and the Brand Code, Ship-From Location, and Ship-To Country grain.';
       colHeader.textContent = '|Aₜ − Fₜ| (abs error)';
       compEl.style.display = 'block';
     }
@@ -1764,19 +1786,19 @@ const DemandGenerator = (() => {
       const f = calcForecasts[i];
       const absErr = Math.abs(a - f);
       totalAbsErr += absErr;
-      totalActuals += Math.abs(a);
+      totalActuals += a;
       sumPctErr += a !== 0 ? absErr / Math.abs(a) : 0;
     });
     const simpleMape = (sumPctErr / calcActuals.length) * 100;
-    const volumeMape = totalActuals > 0 ? (totalAbsErr / totalActuals) * 100 : 0;
+    const volumeMape = totalActuals > 0 ? (totalAbsErr / totalActuals) * 100 : null;
 
     if (calcMode === 'simple') {
       d3.select("#mape-result").text("Simple MAPE = " + simpleMape.toFixed(2) + "%");
     } else {
-      d3.select("#mape-result").text("Volume-Weighted MAPEx = " + volumeMape.toFixed(2) + "%");
+      d3.select("#mape-result").text("MAPEx comparison = " + (volumeMape === null ? "Unavailable: aggregate actuals are zero or negative" : volumeMape.toFixed(2) + "%"));
       d3.select("#mapex-num").text(totalAbsErr.toFixed(1));
       d3.select("#mapex-den").text(totalActuals.toFixed(1));
-      d3.select("#mapex-ratio").text(volumeMape.toFixed(2));
+      d3.select("#mapex-ratio").text(volumeMape === null ? "unavailable" : volumeMape.toFixed(2));
     }
   }
 
@@ -1873,8 +1895,8 @@ const DemandGenerator = (() => {
         totalActual += a;
       }
     });
-    if (totalActual === 0) {
-      return totalAbsoluteError > 0 ? Infinity : 0;
+    if (totalActual <= 0) {
+      return null;
     }
     const mapexError = totalAbsoluteError / totalActual;
     return mapexError * 100;
@@ -1903,7 +1925,7 @@ const DemandGenerator = (() => {
     const mape = computeMAPE(actuals, forecasts);
     const targetDate = new Date(tsToday.getTime() + horizonDays * 86400000);
     d3.select("#ts-mape").text(
-      "MAPEx at horizon " + horizonDays + " days (target: " + tsDateFmt(targetDate) + ") = " + (mape === Infinity ? "Error: Forecast with zero actuals" : mape.toFixed(2) + "%")
+      "MAPEx at horizon " + horizonDays + " days (target: " + tsDateFmt(targetDate) + ") = " + (mape === null ? "Unavailable: aggregate actuals are zero or negative" : mape.toFixed(2) + "%")
     );
 
     const svg = tsContainer.append("svg")
@@ -2245,8 +2267,9 @@ const DemandGenerator = (() => {
     }
     const maxVersionIdx = todayIdx - H + 1;
     const versions = [];
-    for (let vi = Math.max(0, maxVersionIdx - 15); vi <= maxVersionIdx; vi++) {
-      versions.push(vi);
+    for (let vi = Math.max(0, maxVersionIdx - 20); vi <= maxVersionIdx; vi++) {
+      const candidateDate = new Date(startDate.getTime() + vi * 86400000);
+      if (candidateDate.getDay() !== 0) versions.push(vi);
     }
 
     d3.select("#version-slider").attr("max", versions.length - 1);
@@ -2270,7 +2293,7 @@ const DemandGenerator = (() => {
     let totalTAE = 0;
     let totalActualsAll = 0;
     let versionCount = 0;
-    for (let vi = Math.max(0, maxVersionIdx - 15); vi <= maxVersionIdx; vi++) {
+    for (const vi of versions) {
       let vTAE = 0;
       let vAct = 0;
       for (let d = vi; d < vi + H && d < nDays; d++) {
@@ -2281,12 +2304,12 @@ const DemandGenerator = (() => {
       totalActualsAll += vAct;
       versionCount++;
     }
-    const aggregateMAPEx = totalActualsAll > 0 ? (totalTAE / totalActualsAll) * 100 : 0;
+    const aggregateMAPEx = totalActualsAll > 0 ? (totalTAE / totalActualsAll) * 100 : null;
 
     d3.select("#version-stats").html(
       "<strong>Version " + dvFmt(versionDate) + ":</strong> Bucket [" + dvFmt(versionDate) + " \u2013 " + dvFmt(bucketEndDate) + "]<br>" +
-      "TAE = " + tae.toFixed(1) + ", Actuals = " + actualsSum.toFixed(1) + ", MAPE = " + versionMAPE.toFixed(2) + "%" +
-      "<br><strong style=\"color:var(--accent);\">Aggregate MAPEx (H=" + H + ", " + versionCount + " versions): " + aggregateMAPEx.toFixed(2) + "%</strong>"
+      "TAE = " + tae.toFixed(1) + ", Actuals = " + actualsSum.toFixed(1) + ", Version error = " + (actualsSum > 0 ? versionMAPE.toFixed(2) + "%" : "unavailable") +
+      "<br><strong style=\"color:var(--accent);\">Aggregate MAPEx (H=" + H + ", " + versionCount + " eligible versions): " + (aggregateMAPEx === null ? "unavailable" : aggregateMAPEx.toFixed(2) + "%") + "</strong>"
     );
 
     // Draw chart with bucket highlighted
@@ -2416,7 +2439,7 @@ const DemandGenerator = (() => {
     tbody.selectAll("*").remove();
 
     const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
-    const horizons = [7, 14, 21, 28, 35];
+    const horizons = [7, 14, 21, 28, 35, 42];
 
     // Impact map corrected per business logic:
     // H=7: W1 forecast is within month M only
@@ -2553,14 +2576,24 @@ const DemandGenerator = (() => {
       grouped.forEach((vals, h) => {
         const act = vals.map(v => v.actual);
         const pred = vals.map(v => v.forecast);
-        mapexData.push({ horizon: h, mape: computeMAPE(act, pred) });
+        const horizonMape = computeMAPE(act, pred);
+        if (horizonMape !== null) mapexData.push({ horizon: h, mape: horizonMape });
       });
       mapexData.sort((a, b) => a.horizon - b.horizon);
+
+      if (mapexData.length === 0) {
+        d3.select("#csv-mape-result").text("Simplified MAPEx comparison unavailable: every horizon has zero or negative aggregate actuals.");
+        d3.select("#csv-mapex-chart").append("p")
+          .attr("class", "muted")
+          .style("text-align", "center").style("font-size", "0.82rem")
+          .text("Add a horizon group with a positive aggregate actual volume to draw the comparison curve.");
+        return;
+      }
 
       const overallAct = rows.map(r => r.actual);
       const overallPred = rows.map(r => r.forecast);
       const overallMape = computeMAPE(overallAct, overallPred);
-      d3.select("#csv-mape-result").text("Overall MAPEx Error = " + (overallMape === Infinity ? "Error: Forecast with zero actuals" : overallMape.toFixed(2) + "%"));
+      d3.select("#csv-mape-result").text("Simplified MAPEx comparison = " + (overallMape === null ? "Unavailable: aggregate actuals are zero or negative" : overallMape.toFixed(2) + "%"));
 
       // Draw MAPEx bar chart
       const container = d3.select("#csv-mapex-chart");
@@ -2624,7 +2657,7 @@ const DemandGenerator = (() => {
       const act = rows.map(r => r.actual);
       const pred = rows.map(r => r.forecast);
       const mape = computeMAPE(act, pred);
-      d3.select("#csv-mape-result").text("MAPEx Error = " + (mape === Infinity ? "Error: Forecast with zero actuals" : mape.toFixed(2) + "% (" + rows.length + " rows)"));
+      d3.select("#csv-mape-result").text("Simplified MAPEx comparison = " + (mape === null ? "Unavailable: aggregate actuals are zero or negative" : mape.toFixed(2) + "% (" + rows.length + " rows)"));
       d3.select("#csv-mapex-chart").append("p")
         .attr("class", "muted")
         .style("text-align", "center").style("font-size", "0.82rem")
@@ -2674,7 +2707,7 @@ const DemandGenerator = (() => {
     // Generate a synthetic daily series: 25 days before today + 35 days after
     const rngL = seededRandom(99);
     const daysBefore = 25;
-    const daysAfter = 36; // enough to cover max horizon (35d)
+    const daysAfter = 43; // enough to cover max horizon (42d)
     const nDays = daysBefore + daysAfter;
     const lagSeries = [];
     let sv = 100;
@@ -2691,7 +2724,7 @@ const DemandGenerator = (() => {
       7:  "H=7: The blind spot is only 7 days. Recent patterns are still very relevant. The model sees ~96% of available context.",
       14: "H=14: Two-week blind spot. Weekly seasonality may help bridge the gap, but day-of-week specifics start to blur.",
       21: "H=21: Three-week lag. The model must rely on structural patterns like monthly cycles rather than recent observations.",
-      28: "H=28: Four weeks — one full planning cycle. The model is now extrapolating beyond its last observation. Surprising accuracy can occur if the product has strong monthly seasonality.",
+      28: "H=28: Four weeks — one full planning cycle. The model is now extrapolating beyond its last observation. Surprisingly low error can occur if the product has strong monthly seasonality.",
       35: "H=35: Five-week blind spot. In supply chain, this is a full lead-time cycle. Local noise is irrelevant; structural signals dominate. Some seasonal products show <em>lower</em> MAPEx at H=35 than H=7!"
     };
 
