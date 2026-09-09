@@ -230,12 +230,14 @@
     .vis-card svg { display: block; width: 100%; height: auto; }
 
     .version-map-wrap { overflow-x: auto; border: 1px solid var(--border); background: #fff; }
-    .version-map { border-collapse: collapse; min-width: 980px; width: 100%; table-layout: fixed; font-size: 0.58rem; line-height: 1.1; }
+    .version-map { border-collapse: collapse; min-width: 1180px; width: 100%; table-layout: fixed; font-size: 0.58rem; line-height: 1.1; }
     .version-map th, .version-map td { border: 1px solid #9aa7b8; height: 20px; padding: 0.1rem 0.15rem; text-align: center; white-space: nowrap; }
+    .version-map thead th:not(.version-label) { width: 42px; height: 38px; padding: 0.2rem 0.1rem; vertical-align: middle; }
     .version-map thead th { background: var(--pg-navy); color: #fff; font-weight: 700; }
     .version-map .version-label { position: sticky; left: 0; z-index: 2; width: 96px; background: #eef3f9; color: var(--text); text-align: left; font-family: var(--mono); }
     .version-map thead .version-label { background: var(--pg-navy); color: #fff; }
-    .version-map .day-label { display: block; color: rgba(255,255,255,0.72); font-size: 0.52rem; font-weight: 400; }
+    .version-map .date-label { display: block; font-size: 0.62rem; line-height: 1; }
+    .version-map .day-label { display: block; margin-top: 0.2rem; color: rgba(255,255,255,0.72); font-size: 0.5rem; font-weight: 500; text-transform: uppercase; }
     .version-map .weekend { background: #edf0f4; color: #748096; }
     .version-map .month-boundary { border-left: 2px solid var(--pg-yellow); }
     .version-map .bucket { background: #fff900; color: #222; font-size: 0.5rem; }
@@ -2467,8 +2469,8 @@ const DemandGenerator = (() => {
         .classed("month-boundary", date.getDate() === 1)
         .classed("weekend", date.getDay() === 0)
         .attr("title", formatLongDate(date));
-      cell.append("span").text(formatDate(date));
-      cell.append("span").attr("class", "day-label").text(dayNames[date.getDay()].slice(0, 3));
+      cell.append("span").attr("class", "date-label").text(d3.timeFormat("%d")(date));
+      cell.append("span").attr("class", "day-label").text(dayNames[date.getDay()].slice(0, 1));
     });
 
     const rng = seededRandom(555 + horizon + selectedMonth.getMonth() + selectedMonth.getFullYear());
