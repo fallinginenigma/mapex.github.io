@@ -1091,63 +1091,14 @@
     </div>
     <div class="callout callout-teal" style="margin-bottom:1rem;font-size:0.82rem;">
       Each row is one forecast version. Versions are available every day except Sunday. Yellow cells
-      show the rolling H-day time bucket for that version. The calendar starts at the first of the
-      selected month minus H days and ends at the last day of the selected month.
+      show the rolling H-day time bucket for that version. The first version starts H-1 days before
+      the selected month so its bucket includes the month's first day. The calendar ends at the
+      last day of the selected month.
     </div>
     <div id="daily-versions-chart"></div>
-    <div class="mape-result" id="version-stats"></div>
   </div>
 
   <hr class="divider">
-
-  <!-- ── Forecast Revision Impact Grid ── -->
-  <h2>Forecast Revision Impact Across Horizons</h2>
-  <p>
-    When you edit a forecast in a specific week of the Beginning of Period (BOP),
-    it affects different horizon/month combinations. The table below shows which
-    months are impacted for each horizon when you revise during each week.
-  </p>
-
-  <div class="callout callout-teal" style="margin-bottom:1rem;">
-    <strong>Key Rule:</strong> At H=28, a Week 1 BOP edit impacts <em>both</em> the current
-    month (M) and the next month (M+1), because the 28-day window spans across the month boundary.
-    At H=35, Week 1 edits reach M+1 and M+2. Hover over column headers for pro-tips.
-  </div>
-
-  <div class="vis-card">
-    <h4>Forecast Edit Impact Matrix</h4>
-    <table class="impact-table" id="impact-table">
-      <thead>
-        <tr>
-          <th>Editing Week</th>
-          <th title="H=7: Only affects current week — impacts current month M only.">H=7 Days ℹ️</th>
-          <th title="H=14: Two-week window. Week 1 stays in M; by Week 4 you start bleeding into M+1.">H=14 Days ℹ️</th>
-          <th title="H=21: Three-week window. By Week 3 you're solidly in M+1.">H=21 Days ℹ️</th>
-          <th title="💡 Pro-Tip: W1 and W2 of BOP are critical for H=28 — your edits affect TWO months!">H=28 Days 💡</th>
-          <th title="💡 Pro-Tip: H=35 always looks 5 weeks ahead. Even W1 edits can impact M+2!">H=35 Days 💡</th>
-        </tr>
-      </thead>
-      <tbody id="impact-body"></tbody>
-    </table>
-    <p class="muted" style="margin-top:1rem;text-align:center;">
-      Click on a cell to see which months are affected by editing that week's forecast.
-    </p>
-    <div id="impact-result" class="mape-result" style="display:none;"></div>
-  </div>
-
-  <!-- DP Challenge 1 -->
-  <div class="callout" style="background:linear-gradient(135deg,var(--accent-light),#fff);border-left-color:var(--accent);margin-top:1.5rem;">
-    <strong>DP Challenge:</strong> You are editing Week 1 BOP forecasts today. Which horizon should
-    you focus on to affect <em>next month's</em> MAPEx without impacting this month?
-    <details style="margin-top:0.5rem;cursor:pointer;">
-      <summary style="font-weight:600;color:var(--accent);">Show Answer</summary>
-      <div style="margin-top:0.5rem;padding:0.5rem;background:#fff;border-radius:6px;font-size:0.9rem;">
-        <strong>H=35!</strong> Week 1 at H=35 impacts M+1 and M+2 (skipping current M entirely).
-        H=28 Week 1 would also affect M+1 but it also bleeds into M.
-        H=7, H=14, H=21 Week 1 edits only affect M.
-      </div>
-    </details>
-  </div>
 
   <hr class="divider">
 
@@ -2442,17 +2393,16 @@ const DemandGenerator = (() => {
       : new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
     const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
     const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    const firstVersion = addDays(monthStart, -horizon);
-    while (firstVersion.getDay() === 0) firstVersion.setDate(firstVersion.getDate() - 1);
+    const firstVersion = addDays(monthStart, -(horizon - 1));
+    while (firstVersion.getDay() === 0) firstVersion.setDate(firstVersion.getDate() + 1);
     const lastCalendarDate = new Date(monthEnd.getTime());
     while (lastCalendarDate.getDay() === 0) lastCalendarDate.setDate(lastCalendarDate.getDate() - 1);
-    const lastVersion = addDays(monthEnd, -(horizon - 1));
     const dates = [];
     for (let date = new Date(firstVersion.getTime()); date <= lastCalendarDate; date = addDays(date, 1)) {
       dates.push(new Date(date.getTime()));
     }
 
-    const versions = dates.filter(date => date.getDay() !== 0 && date <= lastVersion);
+    const versions = dates.filter(date => date.getDay() !== 0 && date <= monthEnd);
     const dateKey = d3.timeFormat("%Y-%m-%d");
     const formatDate = d3.timeFormat("%d-%b");
     const formatLongDate = d3.timeFormat("%A, %d %B %Y");
@@ -2473,18 +2423,11 @@ const DemandGenerator = (() => {
       cell.append("span").attr("class", "day-label").text(dayNames[date.getDay()].slice(0, 1));
     });
 
-    const rng = seededRandom(555 + horizon + selectedMonth.getMonth() + selectedMonth.getFullYear());
-    let totalAbsoluteError = 0;
-    let totalActuals = 0;
     const body = table.append("tbody");
     versions.forEach((versionDate, versionIndex) => {
       const row = body.append("tr");
       row.append("th").attr("class", "version-label version-date").text(formatDate(versionDate));
       const bucketEnd = addDays(versionDate, horizon - 1);
-      const volume = 80 + rng() * 100;
-      const errorRate = 0.05 + rng() * 0.12;
-      totalAbsoluteError += volume * horizon * errorRate;
-      totalActuals += volume * horizon;
 
       dates.forEach(date => {
         const inBucket = date >= versionDate && date <= bucketEnd;
@@ -2502,15 +2445,6 @@ const DemandGenerator = (() => {
       });
     });
 
-    const mapex = totalActuals > 0 ? (totalAbsoluteError / totalActuals) * 100 : null;
-    d3.select("#version-stats").html(
-      "<strong>Selected month:</strong> " + d3.timeFormat("%B %Y")(monthStart) +
-      " | <strong>Calendar:</strong> " + formatDate(firstVersion) + " to " + formatDate(lastCalendarDate) +
-      " | <strong>Eligible versions:</strong> " + versions.length +
-      " | <strong>MAPEx (H=" + horizon + "):</strong> " + (mapex === null ? "unavailable" : mapex.toFixed(2) + "%") +
-      "<br><span style=\"font-size:0.8rem;color:var(--text-muted);\">Rows end at " + formatDate(lastVersion) +
-      " so the final H-day bucket ends within the selected month. Sundays are not forecast versions.</span>"
-    );
   }
 
   const dailyMonthSelect = document.getElementById("daily-month-select");
@@ -2518,55 +2452,6 @@ const DemandGenerator = (() => {
   renderVersionCalendar();
   d3.select("#daily-horizon-select").on("change", renderVersionCalendar);
   d3.select("#daily-month-select").on("change", renderVersionCalendar);
-
-  /* ═══════════════════════════════════════
-     3c) Forecast Revision Impact Grid
-     ═══════════════════════════════════════ */
-  function renderImpactGrid() {
-    const tbody = d3.select("#impact-body");
-    tbody.selectAll("*").remove();
-
-    const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
-    const horizons = [7, 14, 21, 28, 35, 42];
-
-    // Impact map corrected per business logic:
-    // H=7: W1 forecast is within month M only
-    // H=14: W1 still within M; W4 spills into M+1
-    // H=21: W1 still within M; W3 and W4 spill into M+1
-    // H=28: W1 BOP spans into BOTH M and M+1; W2+ affect M+1
-    // H=35: W1 BOP spans M+1 AND M+2; H=35 always looks 5 weeks out
-    const impactMap = {
-      "Week 1": { 7: "M", 14: "M", 21: "M", 28: "M, M+1", 35: "M+1, M+2" },
-      "Week 2": { 7: "M", 14: "M", 21: "M, M+1", 28: "M+1", 35: "M+1, M+2" },
-      "Week 3": { 7: "M", 14: "M", 21: "M+1", 28: "M+1", 35: "M+2" },
-      "Week 4": { 7: "M", 14: "M, M+1", 21: "M+1", 28: "M+1", 35: "M+2" }
-    };
-
-    weeks.forEach(function(week) {
-      const tr = tbody.append("tr");
-      tr.append("td").text(week).style("font-weight", "600");
-
-      horizons.forEach(function(h) {
-        const impact = impactMap[week][h];
-        const td = tr.append("td").text(impact);
-
-        if (impact === "M") td.attr("class", "current-month");
-        else if (impact.indexOf(",") >= 0) td.attr("class", "both-months");
-        else td.attr("class", "next-month");
-
-        td.on("click", function() {
-          const rngImpact = seededRandom(week.charCodeAt(5) * 100 + h);
-          const improvement = (rngImpact() * 3 + 1).toFixed(2);
-          d3.select("#impact-result")
-            .style("display", "block")
-            .html("<strong>Editing " + week + " forecasts improves H=" + h + " MAPE by " + improvement + "%</strong><br>" +
-                  "<span style=\"font-size:0.8rem;\">Affected periods: " + impact + "</span>");
-        });
-      });
-    });
-  }
-
-  renderImpactGrid();
 
   /* ═══════════════════════════════════════
      4) Benchmark / Interpretation Chart
@@ -3442,7 +3327,7 @@ const DemandGenerator = (() => {
       renderTSChart();
       previousMapexData = null;
       renderMAPExChart();
-      renderDailyVersionsChart();
+      renderVersionCalendar();
       renderWeeklyHeatmap();
       if (typeof window._renderLagChart === 'function') window._renderLagChart();
     }, 200);
@@ -3532,7 +3417,7 @@ const DemandGenerator = (() => {
   };
 
   window.updateDailyVersionsViz = function() {
-    renderDailyVersionsChart();
+    renderVersionCalendar();
   };
 
   window.updateBiasChart = function() {
