@@ -209,6 +209,20 @@
 
     .vis-card svg { display: block; width: 100%; height: auto; }
 
+    .version-map-wrap { overflow-x: auto; border: 1px solid var(--border); background: #fff; }
+    .version-map { border-collapse: collapse; min-width: 980px; width: 100%; table-layout: fixed; font-size: 0.58rem; line-height: 1.1; }
+    .version-map th, .version-map td { border: 1px solid #9aa7b8; height: 20px; padding: 0.1rem 0.15rem; text-align: center; white-space: nowrap; }
+    .version-map thead th { background: var(--pg-navy); color: #fff; font-weight: 700; }
+    .version-map .version-label { position: sticky; left: 0; z-index: 2; width: 96px; background: #eef3f9; color: var(--text); text-align: left; font-family: var(--mono); }
+    .version-map thead .version-label { background: var(--pg-navy); color: #fff; }
+    .version-map .day-label { display: block; color: rgba(255,255,255,0.72); font-size: 0.52rem; font-weight: 400; }
+    .version-map .weekend { background: #edf0f4; color: #748096; }
+    .version-map .month-boundary { border-left: 2px solid var(--pg-yellow); }
+    .version-map .bucket { background: #fff900; color: #222; font-size: 0.5rem; }
+    .version-map .bucket-start { border-left: 2px solid #333; }
+    .version-map .bucket-end { border-right: 2px solid #333; }
+    .version-map .version-date { font-weight: 700; }
+
     /* ── Interactive controls ── */
     .controls {
       display: flex;
@@ -988,7 +1002,7 @@
 
   <h3>Daily Versions Explained</h3>
   <p>
-    For <strong>today = <span id="dv-today"></span></strong> and <strong>horizon = 14 days</strong>:
+    Select a month and horizon below to see the exact eligible forecast versions and their rolling time buckets:
   </p>
   <ul style="margin:0.75rem 0 1.25rem 1.5rem;color:var(--text);" id="dv-versions-list">
   </ul>
@@ -1028,7 +1042,7 @@
   </div>
 
   <div class="vis-card">
-    <h4>Daily Versions Visualized &mdash; Rolling Windows</h4>
+    <h4>MAPEx Versions &mdash; Monthly Horizon Coverage</h4>
     <div class="controls">
       <div class="control-group">
         <label>Horizon (H)</label>
@@ -1038,22 +1052,17 @@
           <option value="21">21 days</option>
           <option value="28">28 days</option>
           <option value="35">35 days</option>
-          <option value="42">42 days</option>
         </select>
       </div>
       <div class="control-group">
-        <label>Show Version</label>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="range" id="version-slider" min="0" max="15" value="0" step="1">
-          <span class="value-display" id="version-date-display">...</span>
-          <button class="play-btn" id="version-play-btn">Play</button>
-        </div>
+        <label for="daily-month-select">Month</label>
+        <input type="month" id="daily-month-select" style="font-size:0.85rem;padding:0.3em 0.5em;border:1px solid var(--border);border-radius:6px;">
       </div>
     </div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--teal)"></div> Actual</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Forecast</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,61,165,0.08);border:1px dashed var(--accent)"></div> Time Bucket</div>
+    <div class="callout callout-teal" style="margin-bottom:1rem;font-size:0.82rem;">
+      Each row is one forecast version. Versions are available every day except Sunday. Yellow cells
+      show the rolling H-day time bucket for that version. The calendar starts at the first of the
+      selected month minus H days and ends at the last day of the selected month.
     </div>
     <div id="daily-versions-chart"></div>
     <div class="mape-result" id="version-stats"></div>
@@ -1707,24 +1716,17 @@ const DemandGenerator = (() => {
     el = document.getElementById("dv-today");
     if (el) el.textContent = fmtFull(TODAY);
 
-    var latestVersion = addDays(TODAY, -14 + 1); // Version whose bucket ends today
-    while (latestVersion.getDay() === 0) latestVersion = addDays(latestVersion, -1);
-    var prevVersion = previousEligibleVersion(latestVersion);
-    var earliestVersion = prevVersion;
-    for (var versionStep = 1; versionStep < 14; versionStep++) {
-      earliestVersion = previousEligibleVersion(earliestVersion);
-    }
     var listEl = document.getElementById("dv-versions-list");
     if (listEl) {
       listEl.innerHTML =
-        "<li><strong>Version " + fmt(latestVersion) + ":</strong> Bucket = " + fmt(latestVersion) + "&ndash;" + fmt(addDays(latestVersion, 13)) + " (14 days), all actuals available &#10003;</li>" +
-        "<li><strong>Version " + fmt(prevVersion) + ":</strong> Bucket = " + fmt(prevVersion) + "&ndash;" + fmt(addDays(prevVersion, 13)) + " (14 days), all actuals available &#10003;</li>" +
-        "<li>...going back to <strong>Version " + fmt(earliestVersion) + ":</strong> Bucket = " + fmt(earliestVersion) + " &ndash; " + fmt(addDays(earliestVersion, 13)) + "</li>";
+        "<li>Each row in the calendar is one forecast version.</li>" +
+        "<li>Yellow cells show that version's rolling horizon bucket.</li>" +
+        "<li>Sundays remain visible as dates but are never version rows.</li>";
     }
 
     var aggEl = document.getElementById("dv-aggregate-text");
     if (aggEl) {
-      aggEl.innerHTML = "For " + fmtMonth(TODAY) + " MAPEx (H=14), we aggregate versions from <strong>" + fmt(earliestVersion) + " to " + fmt(latestVersion) + "</strong> (all versions where the bucket falls within or overlaps " + fmtMonth(TODAY) + " and actuals are available).";
+      aggEl.innerHTML = "The selected month and horizon determine the calendar range and the eligible versions included in MAPEx.";
     }
 
     // Horizon Lag description dates
@@ -2399,37 +2401,93 @@ const DemandGenerator = (() => {
     }
   }
 
-  renderDailyVersionsChart();
-  d3.select("#daily-horizon-select").on("change", renderDailyVersionsChart);
-  d3.select("#version-slider").on("input", renderDailyVersionsChart);
+  function renderVersionCalendar() {
+    const container = d3.select("#daily-versions-chart");
+    container.selectAll("*").remove();
 
-  // Auto-play animation for Daily Versions
-  var versionPlayTimer = null;
-  d3.select("#version-play-btn").on("click", function() {
-    var btn = d3.select(this);
-    if (versionPlayTimer) {
-      clearInterval(versionPlayTimer);
-      versionPlayTimer = null;
-      btn.classed("playing", false).text("Play");
-      return;
+    const horizon = +d3.select("#daily-horizon-select").property("value");
+    const monthValue = d3.select("#daily-month-select").property("value");
+    const selectedMonth = monthValue
+      ? new Date(monthValue + "-01T00:00:00")
+      : new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+    const firstVersion = addDays(monthStart, -horizon);
+    while (firstVersion.getDay() === 0) firstVersion.setDate(firstVersion.getDate() - 1);
+    const lastCalendarDate = new Date(monthEnd.getTime());
+    while (lastCalendarDate.getDay() === 0) lastCalendarDate.setDate(lastCalendarDate.getDate() - 1);
+    const lastVersion = addDays(monthEnd, -(horizon - 1));
+    const dates = [];
+    for (let date = new Date(firstVersion.getTime()); date <= lastCalendarDate; date = addDays(date, 1)) {
+      dates.push(new Date(date.getTime()));
     }
-    btn.classed("playing", true).text("Pause");
-    var slider = document.getElementById("version-slider");
-    var maxVal = +slider.getAttribute("max");
-    slider.value = 0;
-    renderDailyVersionsChart();
-    versionPlayTimer = setInterval(function() {
-      var cur = +slider.value;
-      if (cur >= maxVal) {
-        clearInterval(versionPlayTimer);
-        versionPlayTimer = null;
-        btn.classed("playing", false).text("Play");
-        return;
-      }
-      slider.value = cur + 1;
-      renderDailyVersionsChart();
-    }, 600);
-  });
+
+    const versions = dates.filter(date => date.getDay() !== 0 && date <= lastVersion);
+    const dateKey = d3.timeFormat("%Y-%m-%d");
+    const formatDate = d3.timeFormat("%d-%b");
+    const formatLongDate = d3.timeFormat("%A, %d %B %Y");
+    const table = container.append("div").attr("class", "version-map-wrap")
+      .append("table").attr("class", "version-map");
+    const colgroup = table.append("colgroup");
+    colgroup.append("col");
+    dates.forEach(() => colgroup.append("col"));
+
+    const header = table.append("thead").append("tr");
+    header.append("th").attr("class", "version-label").text("Version");
+    dates.forEach(date => {
+      const cell = header.append("th")
+        .classed("month-boundary", date.getDate() === 1)
+        .classed("weekend", date.getDay() === 0)
+        .attr("title", formatLongDate(date));
+      cell.append("span").text(formatDate(date));
+      cell.append("span").attr("class", "day-label").text(dayNames[date.getDay()].slice(0, 3));
+    });
+
+    const rng = seededRandom(555 + horizon + selectedMonth.getMonth() + selectedMonth.getFullYear());
+    let totalAbsoluteError = 0;
+    let totalActuals = 0;
+    const body = table.append("tbody");
+    versions.forEach((versionDate, versionIndex) => {
+      const row = body.append("tr");
+      row.append("th").attr("class", "version-label version-date").text(formatDate(versionDate));
+      const bucketEnd = addDays(versionDate, horizon - 1);
+      const volume = 80 + rng() * 100;
+      const errorRate = 0.05 + rng() * 0.12;
+      totalAbsoluteError += volume * horizon * errorRate;
+      totalActuals += volume * horizon;
+
+      dates.forEach(date => {
+        const inBucket = date >= versionDate && date <= bucketEnd;
+        const cell = row.append("td")
+          .classed("bucket", inBucket)
+          .classed("bucket-start", dateKey(date) === dateKey(versionDate))
+          .classed("bucket-end", dateKey(date) === dateKey(bucketEnd))
+          .classed("month-boundary", date.getDate() === 1)
+          .attr("title", inBucket
+            ? "Version " + formatDate(versionDate) + " covers " + formatLongDate(date)
+            : formatLongDate(date));
+        if (inBucket && versionIndex % 3 === 0 && dateKey(date) === dateKey(versionDate)) {
+          cell.text("Time bucket of " + horizon + " days");
+        }
+      });
+    });
+
+    const mapex = totalActuals > 0 ? (totalAbsoluteError / totalActuals) * 100 : null;
+    d3.select("#version-stats").html(
+      "<strong>Selected month:</strong> " + d3.timeFormat("%B %Y")(monthStart) +
+      " | <strong>Calendar:</strong> " + formatDate(firstVersion) + " to " + formatDate(lastCalendarDate) +
+      " | <strong>Eligible versions:</strong> " + versions.length +
+      " | <strong>MAPEx (H=" + horizon + "):</strong> " + (mapex === null ? "unavailable" : mapex.toFixed(2) + "%") +
+      "<br><span style=\"font-size:0.8rem;color:var(--text-muted);\">Rows end at " + formatDate(lastVersion) +
+      " so the final H-day bucket ends within the selected month. Sundays are not forecast versions.</span>"
+    );
+  }
+
+  const dailyMonthSelect = document.getElementById("daily-month-select");
+  dailyMonthSelect.value = d3.timeFormat("%Y-%m")(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1));
+  renderVersionCalendar();
+  d3.select("#daily-horizon-select").on("change", renderVersionCalendar);
+  d3.select("#daily-month-select").on("change", renderVersionCalendar);
 
   /* ═══════════════════════════════════════
      3c) Forecast Revision Impact Grid
